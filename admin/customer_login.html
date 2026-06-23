@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Vektia — Müşteri Paneli Girişi">
+    <title>Vektia — Müşteri Girişi</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Ana sayfaya dön butonu için ekstra stil */
+        .back-link {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+            z-index: 100;
+        }
+        .back-link:hover {
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-link">← Ana Sayfaya Dön</a>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">V</div>
+                <h1 class="login-title">Müşteri Paneli</h1>
+                <p class="login-subtitle">Size özel dashboard'a erişmek için API Key'iniz ile giriş yapın.</p>
+            </div>
+
+            <div id="loginError" class="login-error"></div>
+
+            <form class="login-form" id="customerLoginForm" autocomplete="off">
+                <div class="form-group">
+                    <label class="form-label" for="apiKeyInput">API Key</label>
+                    <input 
+                        type="password" 
+                        id="apiKeyInput" 
+                        class="form-input" 
+                        placeholder="vektia_api_key_..." 
+                        required 
+                        autofocus
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    <span id="loginBtnText">Giriş Yap</span>
+                    <span id="loginBtnSpinner" class="loading-spinner" style="display:none; width:18px; height:18px; border-width:2px; margin:0;"></span>
+                </button>
+            </form>
+
+            <div style="margin-top: 24px; text-align: center;">
+                <p style="font-size: 0.72rem; color: var(--text-muted);">
+                    Henüz API Key'iniz yok mu? <a href="/#pricing" style="color: var(--primary-color); text-decoration: none;">Kayıt Olun</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        const loginForm = document.getElementById('customerLoginForm');
+        const loginError = document.getElementById('loginError');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginBtnText = document.getElementById('loginBtnText');
+        const loginBtnSpinner = document.getElementById('loginBtnSpinner');
+
+        // Zaten giriş yapılmışsa dashboard'a yönlendir
+        if (VektiaAPI.getToken()) {
+            window.location.href = 'customer.html';
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+
+            // Loading durumu
+            loginBtn.disabled = true;
+            loginBtnText.style.display = 'none';
+            loginBtnSpinner.style.display = 'inline-block';
+            loginError.classList.remove('show');
+
+            try {
+                // Özel customer login endpoint'ine istek at
+                const response = await fetch(VektiaAPI.baseUrl + '/api/v1/customer/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: apiKey })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.detail || 'Giriş başarısız. Lütfen API Key\'inizi kontrol edin.');
+                }
+
+                const data = await response.json();
+                
+                // Token'ı localStorage'a kaydediyoruz
+                VektiaAPI.setToken(data.access_token);
+                
+                window.location.href = 'customer.html';
+            } catch (err) {
+                loginError.textContent = err.message || 'Giriş başarısız';
+                loginError.classList.add('show');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtnText.style.display = 'inline';
+                loginBtnSpinner.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

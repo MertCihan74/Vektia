@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="title_settings">Vektia — Ayarlar</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .settings-row:last-child {
+            border-bottom: none;
+        }
+
+        .settings-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .settings-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Toggle Switch CSS */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--text-muted);
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+            background-color: #fff;
+        }
+
+        .sub-settings {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            display: none; /* Hidden by default, shown via JS */
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- ═══ SIDEBAR ═══ -->
+        <aside class="sidebar" style="width: 260px;">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="logo-icon">V</div>
+                    <span class="logo-text">Vektia</span>
+                    <span class="badge" id="tierBadge" style="margin-left:auto; font-size:0.7rem;"></span>
+                </div>
+            </div>
+            
+            <div style="padding: 1rem; color: var(--primary-color); font-weight: 500; border-bottom: 1px solid var(--border-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="clientNameDisplay">
+                Yükleniyor...
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Stüdyo Menüsü</div>
+                <a href="customer.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span data-i18n="menu_dashboard">Dashboard</span>
+                </a>
+                <a href="customer_players.html" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span data-i18n="menu_users">Kullanıcılar</span>
+                </a>
+                <a href="customer_billing.html" class="nav-item">
+                    <span class="nav-icon">💳</span>
+                    <span data-i18n="menu_billing">Üyelik Bilgilerim</span>
+                </a>
+                <a href="customer_settings.html" class="nav-item active">
+                    <span class="nav-icon">⚙️</span>
+                    <span data-i18n="menu_settings">Ayarlar</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn btn-ghost" style="width: 100%; text-align: left; display: flex; align-items: center; gap: 0.5rem;" onclick="logoutCustomer()">
+                    🚪 <span data-i18n="menu_logout">Çıkış Yap</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ═══ MAIN CONTENT ═══ -->
+        <main class="main-content">
+            <header class="top-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <h1 class="header-title" data-i18n="title_settings">Ayarlar</h1>
+                <select id="langSelect" class="input-field" style="width:auto; padding:0.25rem; height:auto; background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--text-primary);" onchange="i18n.setLang(this.value)">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="tr">🇹🇷 TR</option>
+                </select>
+            </header>
+
+            <div class="page-content">
+                
+                <div class="card" style="max-width: 600px; margin: 0 auto; display: none;" id="premiumOnlyWarning">
+                    <div class="card-body" style="text-align: center; color: var(--text-muted);">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+                        <h3 data-i18n="premium_required">Premium Özellik</h3>
+                        <p data-i18n="premium_settings_desc" style="margin-top: 0.5rem; margin-bottom: 1.5rem;">Otomatik engelleme ve gelişmiş ayarları kullanmak için Premium pakete geçiş yapmalısınız.</p>
+                        <a href="customer_billing.html" class="btn btn-primary" data-i18n="btn_upgrade">Yükselt</a>
+                    </div>
+                </div>
+
+                <div class="card" style="max-width: 600px; margin: 0 auto; display: none;" id="settingsContainer">
+                    <div class="card-header">
+                        <span class="card-title" data-i18n="protection_settings">Koruma Ayarları</span>
+                    </div>
+                    <div class="card-body">
+                        
+                        <div class="settings-row">
+                            <div class="settings-info">
+                                <h3 data-i18n="auto_ban_title">Otomatik Engelleme</h3>
+                                <p data-i18n="auto_ban_desc">Yapay zeka tarafından tespit edilen botları beklemeden engeller.</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="autoBanToggle" onchange="toggleAutoBanSubOptions()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="sub-settings" id="autoBanOptions">
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;" data-i18n="auto_ban_select">Hangi seviyeler otomatik engellensin?</p>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="autoBanHighRisk">
+                                <label for="autoBanHighRisk" data-i18n="risk_high">Riskli (Kesin Bot)</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="autoBanSuspicious">
+                                <label for="autoBanSuspicious" data-i18n="risk_suspicious">Şüpheli</label>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+                            <button class="btn btn-primary" id="saveSettingsBtn" onclick="saveSettings()" data-i18n="btn_save">Kaydet</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        if (!VektiaAPI.getToken()) {
+            window.location.href = 'customer_login.html';
+        }
+
+        async function initSettings() {
+            try {
+                const info = await VektiaAPI.request('/api/v1/customer/dashboard');
+                document.getElementById('clientNameDisplay').textContent = info.client_name || 'Bilinmiyor';
+                document.getElementById('tierBadge').textContent = info.tier.toUpperCase();
+                
+                if (info.tier === 'premium') {
+                    document.getElementById('tierBadge').className = 'badge warning';
+                } else {
+                    document.getElementById('tierBadge').className = 'badge';
+                }
+
+                document.getElementById('settingsContainer').style.display = 'block';
+
+                if (info.tier !== 'premium') {
+                    document.getElementById('premiumOnlyWarning').style.display = 'block';
+                    document.getElementById('autoBanToggle').disabled = true;
+                    document.getElementById('autoBanHighRisk').disabled = true;
+                    document.getElementById('autoBanSuspicious').disabled = true;
+                    document.getElementById('saveSettingsBtn').disabled = true;
+                    return; // Premium olmadığı için API'den ayarları çekmeye gerek yok
+                }
+
+                // Fetch current settings
+                const token = VektiaAPI.getToken();
+                const res = await fetch('/api/v1/customer/settings', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const settings = await res.json();
+                    document.getElementById('autoBanToggle').checked = settings.auto_ban_enabled;
+                    document.getElementById('autoBanHighRisk').checked = settings.auto_ban_high_risk;
+                    document.getElementById('autoBanSuspicious').checked = settings.auto_ban_suspicious;
+                    toggleAutoBanSubOptions();
+                }
+
+            } catch (err) {
+                console.error(err);
+                if (err.message === 'Unauthorized') {
+                    VektiaAPI.logout();
+                    window.location.href = 'customer_login.html';
+                }
+            }
+        }
+
+        function toggleAutoBanSubOptions() {
+            const isEnabled = document.getElementById('autoBanToggle').checked;
+            document.getElementById('autoBanOptions').style.display = isEnabled ? 'block' : 'none';
+        }
+
+        async function saveSettings() {
+            const btn = document.getElementById('saveSettingsBtn');
+            const originalText = btn.textContent;
+            btn.textContent = '...';
+            btn.disabled = true;
+
+            const payload = {
+                auto_ban_enabled: document.getElementById('autoBanToggle').checked,
+                auto_ban_high_risk: document.getElementById('autoBanHighRisk').checked,
+                auto_ban_suspicious: document.getElementById('autoBanSuspicious').checked
+            };
+
+            try {
+                const token = VektiaAPI.getToken();
+                const res = await fetch('/api/v1/customer/settings', {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.ok) {
+                    btn.textContent = 'Kaydedildi ✔️';
+                    setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+                } else {
+                    alert('Ayarlar kaydedilirken hata oluştu.');
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Ayarlar kaydedilirken hata oluştu.');
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function logoutCustomer() {
+            VektiaAPI.logout();
+            window.location.href = 'customer_login.html';
+        }
+
+        initSettings();
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const lang = localStorage.getItem('vektia_lang') || 'en';
+            document.getElementById('langSelect').value = lang;
+            i18n.translatePage();
+        });
+    </script>
+</body>
+</html>

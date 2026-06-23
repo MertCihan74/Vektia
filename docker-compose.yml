@@ -1,0 +1,83 @@
+version: "3.9"
+
+services:
+  # === Redis (In-Memory Data Store) ===
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly no --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # === PostgreSQL (Relational Database) ===
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=vektia
+      - POSTGRES_PASSWORD=vektia_pass
+      - POSTGRES_DB=vektia
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vektia -d vektia"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # === Vektia API Server ===
+  api:
+    build:
+      context: .
+      target: api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - VEKTIA_REDIS_URL=redis://redis:6379/0
+      - VEKTIA_DATABASE_URL=postgresql+asyncpg://vektia:vektia_pass@db:5432/vektia
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    volumes:
+      - ./models:/app/models
+      - ./vektia:/app/vektia
+      - ./admin:/app/admin
+      - ./public:/app/public
+    restart: unless-stopped
+
+  # === Background ML Worker ===
+  worker:
+    build:
+      context: .
+      target: worker
+    env_file:
+      - .env
+    environment:
+      - VEKTIA_REDIS_URL=redis://redis:6379/0
+      - VEKTIA_DATABASE_URL=postgresql+asyncpg://vektia:vektia_pass@db:5432/vektia
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    volumes:
+      - ./models:/app/models
+      - ./vektia:/app/vektia
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  postgres_data:

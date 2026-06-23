@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vektia | Sıfır Gecikmeli AI Anti-Cheat</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --surface-color: #111111;
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent-cyan: #06b6d4;
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #27272a;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Background Effects */
+        .glow-bg {
+            position: absolute;
+            top: -20%; left: 50%;
+            transform: translateX(-50%);
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, rgba(0,0,0,0) 70%);
+            z-index: -1;
+        }
+
+        /* Navbar */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.5rem 5%; background: rgba(5,5,5,0.8);
+            backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; display:flex; align-items:center; gap:0.5rem; }
+        .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary-color), var(--accent-cyan)); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-weight:900; }
+        
+        .nav-links a { color: var(--text-muted); text-decoration: none; margin-left: 2rem; transition: color 0.2s; font-weight: 500; }
+        .nav-links a:hover { color: var(--text-color); }
+        
+        .btn {
+            padding: 0.75rem 1.5rem; border-radius: var(--radius-md); font-weight: 600;
+            cursor: pointer; transition: all 0.2s; text-decoration: none; border: none; font-size: 0.95rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-cyan));
+            color: white; box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,0.5); }
+        .btn-outline {
+            background: transparent; border: 1px solid var(--border-color); color: var(--text-color);
+        }
+        .btn-outline:hover { border-color: var(--text-muted); }
+
+        /* Hero Section */
+        .hero {
+            text-align: center; padding: 6rem 1rem 4rem; max-width: 900px; margin: 0 auto;
+        }
+        .hero h1 {
+            font-size: 4.5rem; font-weight: 800; line-height: 1.1; letter-spacing: -2px;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #fff, #9ca3af);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p { font-size: 1.25rem; color: var(--text-muted); margin-bottom: 2.5rem; max-width: 600px; margin-inline: auto; }
+        
+        /* Features */
+        .features {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem; padding: 4rem 5%; max-width: 1200px; margin: 0 auto;
+        }
+        .feature-card {
+            background: var(--surface-color); padding: 2rem; border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color); transition: transform 0.3s, border-color 0.3s;
+        }
+        .feature-card:hover { transform: translateY(-5px); border-color: var(--primary-color); }
+        .feature-icon { font-size: 2rem; margin-bottom: 1rem; }
+        .feature-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .feature-text { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* Pricing */
+        .pricing-section { padding: 4rem 5%; text-align: center; }
+        .pricing-section h2 { font-size: 2.5rem; margin-bottom: 3rem; }
+        .pricing-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem; max-width: 900px; margin: 0 auto;
+        }
+        .price-card {
+            background: var(--surface-color); padding: 3rem 2rem; border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color); position: relative; text-align: left;
+        }
+        .price-card.premium { border-color: var(--primary-color); }
+        .price-card.premium::before {
+            content: 'ÖNERİLEN'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: var(--primary-color); font-size: 0.75rem; font-weight: bold; padding: 4px 12px; border-radius: 20px;
+        }
+        .price-tier { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .price-amount { font-size: 3rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: baseline; }
+        .price-amount span { font-size: 1rem; color: var(--text-muted); font-weight: normal; margin-left: 0.25rem; }
+        .price-features { list-style: none; margin-bottom: 2rem; }
+        .price-features li { margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); }
+        .price-features li::before { content: '✓'; color: var(--primary-color); font-weight: bold; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal {
+            background: var(--surface-color); padding: 3rem; border-radius: var(--radius-lg);
+            width: 100%; max-width: 450px; border: 1px solid var(--border-color);
+        }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; }
+        .form-control {
+            width: 100%; padding: 0.75rem; background: var(--bg-color); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); color: white; outline: none; font-size: 1rem;
+        }
+        .form-control:focus { border-color: var(--primary-color); }
+    </style>
+</head>
+<body>
+    <div class="glow-bg"></div>
+
+    <nav>
+        <div class="logo">
+            <div class="logo-icon">V</div>
+            Vektia
+        </div>
+        <div class="nav-links" style="display:flex; align-items:center;">
+            <a href="#features" data-i18n="nav_features">Özellikler</a>
+            <a href="#pricing" data-i18n="nav_pricing">Fiyatlandırma</a>
+            <a href="/admin/customer_login.html" data-i18n="nav_login">Müşteri Girişi</a>
+            <button class="btn btn-primary" style="margin-left: 2rem;" onclick="openRegisterModal('premium')" data-i18n="nav_cta">Hemen Başla</button>
+            <select id="langSelect" style="margin-left:1rem; padding:0.25rem; background:transparent; color:var(--text-color); border:1px solid var(--border-color); border-radius:4px; outline:none;" onchange="i18n.setLang(this.value)">
+                <option value="en">🇬🇧 EN</option>
+                <option value="tr">🇹🇷 TR</option>
+            </select>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1 data-i18n="hero_title">Platformunuzu bot ve ihlalcilerden arındırın.</h1>
+        <p data-i18n="hero_subtitle">Gelişmiş istatistiksel analiz ve yapay zeka ile makro, bot ve anormal kullanıcı davranışlarını 0ms gecikme ile tespit edin.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button class="btn btn-primary" onclick="openRegisterModal('free')" data-i18n="btn_free_trial">Ücretsiz Denemeye Başla</button>
+            <a href="/admin/customer_login.html" class="btn btn-outline" data-i18n="btn_login">Giriş Yap</a>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3 class="feature-title" data-i18n="feat1_title">Asenkron API (0ms Gecikme)</h3>
+            <p class="feature-text" data-i18n="feat1_desc">Sunucunuz telemetri verisini fire-and-forget mantığıyla gönderir. Kullanıcı deneyiminde zerre yavaşlama olmaz.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🧠</div>
+            <h3 class="feature-title" data-i18n="feat2_title">Katmanlı Elek Mimarisi</h3>
+            <p class="feature-text" data-i18n="feat2_desc">Kurallı mantıktan başlayıp, istatistiksel standart sapmaya ve derin öğrenme (LSTM) analizine uzanan 3 katmanlı güvenlik.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3 class="feature-title" data-i18n="feat3_title">İzole Müşteri Paneli</h3>
+            <p class="feature-text" data-i18n="feat3_desc">Sadece size özel dashboard üzerinden kullanıcılarınızı anlık takip edin, riskli tespitleri görüp anında yasaklayın.</p>
+        </div>
+    </section>
+
+    <section id="pricing" class="pricing-section">
+        <h2 data-i18n="pricing_title">Şeffaf ve Esnek Planlar</h2>
+        <div class="pricing-grid">
+            <div class="price-card">
+                <div class="price-tier" data-i18n="price_free">Free Trial</div>
+                <div class="price-amount">$0 <span data-i18n="price_free_period">/7 Gün</span></div>
+                <ul class="price-features">
+                    <li data-i18n="price_free_desc1">7 Gün tam erişim</li>
+                    <li data-i18n="price_free_desc2">Limitsiz tespit (Gizlenmiş User ID)</li>
+                    <li data-i18n="price_free_desc3">Sistem doğruluğunu test etme</li>
+                    <li data-i18n="price_free_desc4">Topluluk Desteği</li>
+                </ul>
+                <button class="btn btn-outline" style="width: 100%; margin-top: 1rem;" onclick="openRegisterModal('free')" data-i18n="btn_start_free">Ücretsiz Başla</button>
+            </div>
+            <div class="price-card premium">
+                <div class="price-tier" data-i18n="price_premium">Premium</div>
+                <div class="price-amount">$99 <span data-i18n="price_prem_period">/Ay</span></div>
+                <ul class="price-features">
+                    <li data-i18n="price_prem_desc1">Limitsiz API İsteği</li>
+                    <li data-i18n="price_prem_desc2">Gerçek User ID Görünürlüğü</li>
+                    <li data-i18n="price_prem_desc3">Dashboard üzerinden Tek Tıkla Ban</li>
+                    <li data-i18n="price_prem_desc4">Otomatik Webhook Entegrasyonu</li>
+                    <li data-i18n="price_prem_desc5">7/24 Öncelikli Destek</li>
+                </ul>
+                <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="openRegisterModal('premium')" data-i18n="nav_cta">Hemen Başla</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Kayıt Modal -->
+    <div id="registerModal" class="modal-overlay">
+        <div class="modal">
+            <h2 style="margin-bottom: 0.5rem; font-size: 1.5rem;" data-i18n="modal_reg_title">Sisteme Kayıt Ol</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.9rem;" data-i18n="modal_reg_sub">
+                Stüdyo adınızı ve kurumsal e-postanızı girin.
+            </p>
+            
+            <!-- Aşama 1: Email Gönderimi -->
+            <form id="registerForm">
+                <input type="hidden" id="regTier" value="premium">
+                <div class="form-group">
+                    <label data-i18n="lbl_studio_name">Stüdyo / Platform Adı</label>
+                    <input type="text" id="regName" class="form-control" required placeholder="Örn: Epic Games" data-i18n="ph_studio">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="lbl_corp_email">Kurumsal E-posta</label>
+                    <input type="email" id="regEmail" class="form-control" required placeholder="Örn: hello@epicgames.com" data-i18n="ph_email">
+                    <small style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem; display: block;" data-i18n="msg_no_personal">Kişisel ve geçici e-postalar kabul edilmez.</small>
+                </div>
+                <div class="form-group" style="margin-top: 1.5rem; margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+                    <input type="checkbox" id="regTerms" required style="margin-top: 0.25rem;">
+                    <label for="regTerms" style="font-size: 0.85rem; color: var(--text-muted); cursor: pointer;" data-i18n="lbl_terms_agree">
+                        <a href="terms.html" target="_blank" style="color: var(--accent-cyan); text-decoration: none;">Hizmet Şartları</a>'nı ve 
+                        <a href="privacy.html" target="_blank" style="color: var(--accent-cyan); text-decoration: none;">Gizlilik Politikası (KVKK)</a>'nı okudum, anladım ve kabul ediyorum.
+                    </label>
+                </div>
+                <div id="regError" style="display:none; color: #ef4444; background: rgba(239,68,68,0.1); padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem; border: 1px solid #ef4444;"></div>
+                <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top: 1rem;">
+                    <button type="button" class="btn btn-outline" onclick="closeRegisterModal()" data-i18n="btn_cancel">İptal</button>
+                    <button type="submit" class="btn btn-primary" id="regSubmitBtn" data-i18n="btn_continue">Devam Et</button>
+                </div>
+            </form>
+
+            <!-- Aşama 2: OTP Doğrulama -->
+            <form id="otpForm" style="display:none;">
+                <p style="color: var(--text-color); margin-bottom: 1rem; font-size: 0.95rem;" data-i18n="otp_desc">E-posta adresinize gönderilen 6 haneli doğrulama kodunu girin.</p>
+                <div class="form-group">
+                    <label data-i18n="lbl_otp">Doğrulama Kodu</label>
+                    <input type="text" id="otpCode" class="form-control" required placeholder="000000" maxlength="6" style="text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem;">
+                </div>
+                <div id="otpError" style="display:none; color: #ef4444; background: rgba(239,68,68,0.1); padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem; border: 1px solid #ef4444;"></div>
+                <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top: 1rem;">
+                    <button type="button" class="btn btn-outline" onclick="closeRegisterModal()" data-i18n="btn_cancel">İptal</button>
+                    <button type="submit" class="btn btn-primary" id="otpSubmitBtn" data-i18n="btn_verify">Doğrula</button>
+                </div>
+            </form>
+            
+            <!-- Aşama 3: Başarılı (Free Tier için) -->
+            <div id="regSuccess" style="display: none; text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                <h3 style="margin-bottom: 1rem;">Kayıt Başarılı!</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Lütfen bu API anahtarını güvenli bir yere kaydedin. Bir daha gösterilmeyecektir.</p>
+                <div style="background: var(--bg-color); padding: 1rem; border: 1px dashed var(--primary-color); border-radius: var(--radius-md); font-family: monospace; font-size: 1.1rem; color: var(--accent-cyan); margin-bottom: 2rem; word-break: break-all;" id="newApiKey">
+                </div>
+                <a href="/admin/customer_login.html" class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">Panele Giriş Yap</a>
+                <button type="button" class="btn btn-outline" style="width: 100%;" onclick="closeRegisterModal()">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/admin/js/i18n.js"></script>
+    <script>
+        // Update dict with landing page keys locally or append to i18n
+        if (typeof i18n !== 'undefined') {
+            i18n.dict.tr = { ...i18n.dict.tr, 
+                "nav_features": "Özellikler", 
+                "nav_pricing": "Fiyatlandırma", 
+                "nav_login": "Müşteri Girişi", 
+                "nav_cta": "Hemen Başla",
+                "hero_title": "Platformunuzu bot ve ihlalcilerden arındırın.",
+                "hero_subtitle": "Gelişmiş istatistiksel analiz ve yapay zeka ile makro, bot ve anormal kullanıcı davranışlarını 0ms gecikme ile tespit edin.",
+                "btn_free_trial": "Ücretsiz Denemeye Başla",
+                "btn_login": "Giriş Yap",
+                "feat1_title": "Asenkron API (0ms Gecikme)",
+                "feat1_desc": "Sunucunuz telemetri verisini fire-and-forget mantığıyla gönderir. Kullanıcı deneyiminde zerre yavaşlama olmaz.",
+                "feat2_title": "Katmanlı Elek Mimarisi",
+                "feat2_desc": "Kurallı mantıktan başlayıp, istatistiksel standart sapmaya ve derin öğrenme (LSTM) analizine uzanan 3 katmanlı güvenlik.",
+                "feat3_title": "İzole Müşteri Paneli",
+                "feat3_desc": "Sadece size özel dashboard üzerinden kullanıcılarınızı anlık takip edin, riskli tespitleri görüp anında yasaklayın.",
+                "pricing_title": "Şeffaf ve Esnek Planlar",
+                "price_free": "Ücretsiz Deneme",
+                "price_free_period": "/7 Gün",
+                "price_free_desc1": "7 Gün tam erişim",
+                "price_free_desc2": "Limitsiz tespit (Gizlenmiş User ID)",
+                "price_free_desc3": "Sistem doğruluğunu test etme",
+                "price_free_desc4": "Topluluk Desteği",
+                "btn_start_free": "Ücretsiz Başla",
+                "price_premium": "Premium",
+                "price_prem_period": "/Ay",
+                "price_prem_desc1": "Limitsiz API İsteği",
+                "price_prem_desc2": "Gerçek User ID Görünürlüğü",
+                "price_prem_desc3": "Dashboard üzerinden Tek Tıkla Ban",
+                "price_prem_desc4": "Otomatik Webhook Entegrasyonu",
+                "price_prem_desc5": "7/24 Öncelikli Destek",
+                "modal_reg_title": "Sisteme Kayıt Ol",
+                "modal_reg_sub": "Stüdyo adınızı ve kurumsal e-postanızı girin.",
+                "lbl_studio_name": "Stüdyo / Platform Adı",
+                "ph_studio": "Örn: Epic Games",
+                "lbl_corp_email": "Kurumsal E-posta",
+                "ph_email": "Örn: hello@epicgames.com",
+                "msg_no_personal": "Kişisel ve geçici e-postalar kabul edilmez.",
+                "lbl_terms_agree": "<a href='terms.html' target='_blank' style='color: var(--accent-cyan); text-decoration: none;'>Hizmet Şartları</a>'nı ve <a href='privacy.html' target='_blank' style='color: var(--accent-cyan); text-decoration: none;'>Gizlilik Politikası (KVKK)</a>'nı okudum, anladım ve kabul ediyorum.",
+                "btn_cancel": "İptal",
+                "btn_continue": "Devam Et",
+                "otp_desc": "E-posta adresinize gönderilen 6 haneli doğrulama kodunu girin.",
+                "lbl_otp": "Doğrulama Kodu",
+                "btn_verify": "Doğrula"
+            };
+            i18n.dict.en = { ...i18n.dict.en, 
+                "nav_features": "Features", 
+                "nav_pricing": "Pricing", 
+                "nav_login": "Customer Login", 
+                "nav_cta": "Get Started",
+                "hero_title": "Purify your platform from bots and violators.",
+                "hero_subtitle": "Detect macros, bots, and abnormal user behaviors with 0ms latency using advanced statistical analysis and AI.",
+                "btn_free_trial": "Start Free Trial",
+                "btn_login": "Login",
+                "feat1_title": "Asynchronous API (0ms Latency)",
+                "feat1_desc": "Your server sends telemetry data in a fire-and-forget manner. No slowdown in user experience.",
+                "feat2_title": "Layered Sieve Architecture",
+                "feat2_desc": "3-layer security ranging from rule-based logic to statistical standard deviation and deep learning (LSTM) analysis.",
+                "feat3_title": "Isolated Customer Panel",
+                "feat3_desc": "Monitor your users instantly via a dedicated dashboard, view risky detections, and ban immediately.",
+                "pricing_title": "Transparent and Flexible Plans",
+                "price_free": "Free Trial",
+                "price_free_period": "/7 Days",
+                "price_free_desc1": "7 Days full access",
+                "price_free_desc2": "Unlimited detection (Hidden User ID)",
+                "price_free_desc3": "System accuracy testing",
+                "price_free_desc4": "Community Support",
+                "btn_start_free": "Start for Free",
+                "price_premium": "Premium",
+                "price_prem_period": "/Month",
+                "price_prem_desc1": "Unlimited API Requests",
+                "price_prem_desc2": "Real User ID Visibility",
+                "price_prem_desc3": "One-Click Ban via Dashboard",
+                "price_prem_desc4": "Auto Webhook Integration",
+                "price_prem_desc5": "24/7 Priority Support",
+                "modal_reg_title": "System Registration",
+                "modal_reg_sub": "Enter your studio name and corporate email.",
+                "lbl_studio_name": "Studio / Platform Name",
+                "ph_studio": "e.g., Epic Games",
+                "lbl_corp_email": "Corporate Email",
+                "ph_email": "e.g., hello@epicgames.com",
+                "msg_no_personal": "Personal and temporary emails are not accepted.",
+                "lbl_terms_agree": "I have read and agree to the <a href='terms.html' target='_blank' style='color: var(--accent-cyan); text-decoration: none;'>Terms of Service</a> and <a href='privacy.html' target='_blank' style='color: var(--accent-cyan); text-decoration: none;'>Privacy Policy</a>.",
+                "btn_cancel": "Cancel",
+                "btn_continue": "Continue",
+                "otp_desc": "Enter the 6-digit verification code sent to your email.",
+                "lbl_otp": "Verification Code",
+                "btn_verify": "Verify"
+            };
+            i18n.translatePage();
+        }
+
+        function openRegisterModal(tier) {
+            document.getElementById('regTier').value = tier;
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('otpForm').style.display = 'none';
+            document.getElementById('regSuccess').style.display = 'none';
+            document.getElementById('regError').style.display = 'none';
+            document.getElementById('otpError').style.display = 'none';
+            document.getElementById('registerModal').style.display = 'flex';
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('registerModal').style.display = 'none';
+        }
+
+        // Modal dışına tıklayınca kapatma
+        window.onclick = function(event) {
+            const modal = document.getElementById('registerModal');
+            if (event.target == modal) {
+                closeRegisterModal();
+            }
+        }
+
+        // Aşama 1: OTP Gönder
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const tier = document.getElementById('regTier').value;
+            const errorBox = document.getElementById('regError');
+            const submitBtn = document.getElementById('regSubmitBtn');
+
+            errorBox.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'İşleniyor...';
+
+            try {
+                const res = await fetch('/api/v1/customer/register/send-otp', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name, email, tier })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    throw new Error(data.detail || 'İşlem başarısız oldu.');
+                }
+                
+                // Formu gizle, OTP formunu göster
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('otpForm').style.display = 'block';
+                document.getElementById('otpCode').focus();
+            } catch (err) {
+                errorBox.textContent = err.message;
+                errorBox.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Devam Et';
+            }
+        });
+
+        // Aşama 2: OTP Doğrula
+        document.getElementById('otpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const tier = document.getElementById('regTier').value;
+            const otp_code = document.getElementById('otpCode').value;
+            const errorBox = document.getElementById('otpError');
+            const submitBtn = document.getElementById('otpSubmitBtn');
+
+            errorBox.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Doğrulanıyor...';
+
+            try {
+                const res = await fetch('/api/v1/customer/register/verify-otp', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name, email, tier, otp_code })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    throw new Error(data.detail || 'Doğrulama başarısız oldu.');
+                }
+                
+                if (data.tier === 'free') {
+                    document.getElementById('otpForm').style.display = 'none';
+                    document.getElementById('newApiKey').textContent = data.api_key;
+                    document.getElementById('regSuccess').style.display = 'block';
+                } else if (data.tier === 'premium') {
+                    // Lemon Squeezy Checkout sayfasına yönlendir
+                    submitBtn.textContent = 'Ödemeye Yönlendiriliyor...';
+                    window.location.href = data.checkout_url;
+                }
+            } catch (err) {
+                errorBox.textContent = err.message;
+                errorBox.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Doğrula';
+            }
+        });
+    </script>
+
+    <footer style="border-top: 1px solid var(--border-color); padding: 2rem 5%; text-align: center; color: var(--text-muted); margin-top: 4rem;">
+        <div>
+            <a href="terms.html" style="color: var(--text-muted); text-decoration: none; margin: 0 1rem; transition: color 0.2s;" onmouseover="this.style.color='var(--text-color)'" onmouseout="this.style.color='var(--text-muted)'">Hizmet Şartları</a>
+            <a href="privacy.html" style="color: var(--text-muted); text-decoration: none; margin: 0 1rem; transition: color 0.2s;" onmouseover="this.style.color='var(--text-color)'" onmouseout="this.style.color='var(--text-muted)'">Gizlilik Politikası (KVKK)</a>
+        </div>
+        <div style="margin-top: 1rem; font-size: 0.85rem;">&copy; 2026 Vektia. Tüm hakları saklıdır.</div>
+    </footer>
+</body>
+</html>

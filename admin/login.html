@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Vektia Admin — Behavioral Anti-Cheat Yönetim Paneli Giriş">
+    <title>Vektia — Giriş</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">V</div>
+                <h1 class="login-title">Vektia</h1>
+                <p class="login-subtitle">Behavioral Anti-Cheat Yönetim Paneli</p>
+            </div>
+
+            <div id="loginError" class="login-error">
+                Geçersiz kullanıcı adı veya şifre.
+            </div>
+
+            <form class="login-form" id="loginForm" autocomplete="on">
+                <div class="form-group">
+                    <label class="form-label" for="username">Kullanıcı Adı</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        class="form-input" 
+                        placeholder="admin" 
+                        required 
+                        autocomplete="username"
+                        autofocus
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Şifre</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="form-input" 
+                        placeholder="••••••••" 
+                        required 
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    <span id="loginBtnText">Giriş Yap</span>
+                    <span id="loginBtnSpinner" class="loading-spinner" style="display:none; width:18px; height:18px; border-width:2px; margin:0;"></span>
+                </button>
+            </form>
+
+            <div style="margin-top: 24px; text-align: center;">
+                <p style="font-size: 0.72rem; color: var(--text-muted);">
+                    Vektia v0.1.0 — Event-Driven Behavioral Anti-Cheat
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginBtnText = document.getElementById('loginBtnText');
+        const loginBtnSpinner = document.getElementById('loginBtnSpinner');
+
+        // Zaten giriş yapılmışsa dashboard'a yönlendir
+        if (VektiaAPI.getToken()) {
+            window.location.href = 'index.html';
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Loading durumu
+            loginBtn.disabled = true;
+            loginBtnText.style.display = 'none';
+            loginBtnSpinner.style.display = 'inline-block';
+            loginError.classList.remove('show');
+
+            try {
+                const data = await VektiaAPI.login(username, password);
+                
+                if (data.access_token) {
+                    VektiaAPI.setToken(data.access_token);
+                    window.location.href = 'index.html';
+                } else {
+                    throw new Error('Token alınamadı');
+                }
+            } catch (err) {
+                loginError.textContent = err.message || 'Giriş başarısız';
+                loginError.classList.add('show');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtnText.style.display = 'inline';
+                loginBtnSpinner.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

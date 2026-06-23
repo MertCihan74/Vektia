@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Vektia — Behavioral Anti-Cheat Admin Dashboard">
+    <title>Vektia — Müşteriler</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- ═══ SIDEBAR ═══ -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="logo-icon">V</div>
+                    <span class="logo-text">Vektia</span>
+                    <span class="logo-badge">v0.1</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Ana Menü</div>
+                <a href="index.html" class="nav-item" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="clients.html" class="nav-item active" data-page="clients">
+                    <span class="nav-icon">🏢</span>
+                    Müşteriler
+                </a>
+                <div class="nav-section-label">Sistem</div>
+                <a href="settings.html" class="nav-item" data-page="settings">
+                    <span class="nav-icon">⚙️</span>
+                    Ayarlar
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">A</div>
+                    <div class="user-details">
+                        <div class="user-name" id="adminName">Admin</div>
+                        <div class="user-role">Yönetici</div>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" onclick="VektiaAPI.logout()" title="Çıkış Yap">🚪</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ═══ MAIN CONTENT ═══ -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1 class="header-title">Müşteriler (Oyun Stüdyoları)</h1>
+            </header>
+
+            <div class="page-content">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Kayıtlı Müşteriler</span>
+                        <div class="card-actions">
+                            <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Yeni Müşteri Ekle</button>
+                            <button class="btn btn-ghost btn-sm" onclick="loadClients()">Yenile</button>
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container">
+                            <table class="data-table" id="clientsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Müşteri Adı</th>
+                                        <th>API Key</th>
+                                        <th>Paket (Tier)</th>
+                                        <th>Ödeme (Gün / Durum)</th>
+                                        <th>Kayıt Tarihi</th>
+                                        <th>Durum</th>
+                                        <th style="text-align: right">Aksiyon</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="clientsTableBody">
+                                    <tr>
+                                        <td colspan="6" style="text-align:center; padding:2rem;">Yükleniyor...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MÜŞTERİ MODAL (Ekle / Düzenle) -->
+    <div id="clientModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+        <div class="card" style="width:100%; max-width:500px; padding:2rem; background:var(--surface-color);">
+            <h2 id="modalTitle" style="margin-bottom:1.5rem; font-size:1.25rem;">Müşteri Ekle</h2>
+            
+            <form id="clientForm">
+                <input type="hidden" id="clientId">
+                
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label style="display:block; margin-bottom:0.5rem;">Şirket Adı</label>
+                    <input type="text" id="clientName" class="form-control" required style="width:100%;">
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label style="display:block; margin-bottom:0.5rem;">Paket (Tier)</label>
+                    <select id="clientTier" class="form-control" style="width:100%;">
+                        <option value="premium">Premium</option>
+                        <option value="free">Free (Ücretsiz Deneme)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label style="display:block; margin-bottom:0.5rem;">Fatura Günü (Her ayın kaçı)</label>
+                    <input type="number" id="clientBillingDay" class="form-control" min="1" max="31" value="1" required style="width:100%;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem; display:flex; align-items:center; gap:0.5rem;">
+                    <input type="checkbox" id="clientIsActive" checked>
+                    <label for="clientIsActive">Üyelik Aktif</label>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.5rem; display:flex; align-items:center; gap:0.5rem;">
+                    <input type="checkbox" id="clientIsOverdue">
+                    <label for="clientIsOverdue" style="color:var(--danger-color);">Gecikmiş Ödemesi Var (Overdue)</label>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    <div id="editActions" style="display:none; flex: 1; display:flex; gap:0.5rem;">
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="regenerateApiKey()" style="color:var(--primary-color);">API Key Yenile</button>
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="deleteClient()" style="color:var(--danger-color);">Sil</button>
+                    </div>
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal()">İptal</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script>
+        if (!requireAuth()) throw new Error('Auth required');
+
+        async function loadClients() {
+            const tbody = document.getElementById('clientsTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem;">Yükleniyor...</td></tr>';
+
+            try {
+                const data = await VektiaAPI.request('/api/v1/admin/clients');
+                const clients = data.clients || [];
+
+                if (clients.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem;">Kayıtlı müşteri bulunamadı.</td></tr>';
+                    return;
+                }
+
+                window.clientDataList = clients; // Sakla
+                tbody.innerHTML = clients.map(client => `
+                    <tr>
+                        <td>${client.id}</td>
+                        <td><strong>${client.name}</strong></td>
+                        <td style="font-family:monospace; color:var(--text-muted);">${client.api_key}</td>
+                        <td>
+                            <span class="badge ${client.tier === 'premium' ? 'badge-high' : 'badge-low'}">
+                                ${client.tier ? client.tier.toUpperCase() : 'PREMIUM'}
+                            </span>
+                        </td>
+                        <td>
+                            Ayın ${client.billing_day || 1}'i
+                            ${client.is_overdue ? '<br><span style="color:var(--danger-color); font-size:0.8rem;">Gecikmiş</span>' : ''}
+                        </td>
+                        <td>${new Date(client.created_at).toLocaleString('tr-TR')}</td>
+                        <td>
+                            <span class="badge ${client.is_active ? 'badge-success' : 'badge-danger'}">
+                                ${client.is_active ? 'Aktif' : 'Pasif'}
+                            </span>
+                        </td>
+                        <td style="text-align: right; min-width: 140px;">
+                            <button class="btn btn-ghost btn-sm" onclick="openEditModal(${client.id})">Düzenle</button>
+                            <button class="btn btn-primary btn-sm" onclick="viewClientDashboard(${client.id})">Görüntüle</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--danger-color);">Müşteriler yüklenirken hata oluştu!</td></tr>';
+            }
+        }
+
+        // Modal Functions
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Yeni Müşteri Ekle';
+            document.getElementById('clientId').value = '';
+            document.getElementById('clientName').value = '';
+            document.getElementById('clientTier').value = 'premium';
+            document.getElementById('clientBillingDay').value = '1';
+            document.getElementById('clientIsActive').checked = true;
+            document.getElementById('clientIsOverdue').checked = false;
+            document.getElementById('editActions').style.display = 'none';
+            document.getElementById('clientModal').style.display = 'flex';
+        }
+
+        function openEditModal(id) {
+            const client = window.clientDataList.find(c => c.id === id);
+            if(!client) return;
+            
+            document.getElementById('modalTitle').textContent = 'Müşteri Düzenle (#'+id+')';
+            document.getElementById('clientId').value = id;
+            document.getElementById('clientName').value = client.name;
+            document.getElementById('clientTier').value = client.tier || 'premium';
+            document.getElementById('clientBillingDay').value = client.billing_day || 1;
+            document.getElementById('clientIsActive').checked = client.is_active;
+            document.getElementById('clientIsOverdue').checked = client.is_overdue;
+            
+            document.getElementById('editActions').style.display = 'flex';
+            document.getElementById('clientModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('clientModal').style.display = 'none';
+        }
+
+        document.getElementById('clientForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('clientId').value;
+            const data = {
+                name: document.getElementById('clientName').value,
+                tier: document.getElementById('clientTier').value,
+                billing_day: parseInt(document.getElementById('clientBillingDay').value),
+                is_active: document.getElementById('clientIsActive').checked,
+                is_overdue: document.getElementById('clientIsOverdue').checked
+            };
+
+            try {
+                if (id) {
+                    await VektiaAPI.updateClient(id, data);
+                } else {
+                    await VektiaAPI.createClient(data);
+                }
+                closeModal();
+                loadClients();
+            } catch (err) {
+                alert("Hata: " + err.message);
+            }
+        });
+
+        async function regenerateApiKey() {
+            const id = document.getElementById('clientId').value;
+            if(!id) return;
+            if(!confirm('Bu işlem müşterinin mevcut API Key ini kalıcı olarak geçersiz yapacak. Emin misiniz?')) return;
+            try {
+                await VektiaAPI.regenerateClientApiKey(id);
+                alert("API Key başarıyla yenilendi.");
+                closeModal();
+                loadClients();
+            } catch (err) {
+                alert("Hata: " + err.message);
+            }
+        }
+
+        async function deleteClient() {
+            const id = document.getElementById('clientId').value;
+            if(!id) return;
+            if(!confirm('Bu müşteriyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz!')) return;
+            try {
+                await VektiaAPI.deleteClient(id);
+                closeModal();
+                loadClients();
+            } catch (err) {
+                alert("Hata: " + err.message);
+            }
+        }
+
+        function viewClientDashboard(clientId) {
+            window.location.href = `index.html?client_id=${clientId}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', loadClients);
+    </script>
+</body>
+</html>

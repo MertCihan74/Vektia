@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Vektia — Sistem Ayarları">
+    <title>Vektia — Ayarlar</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="logo-icon">V</div>
+                    <span class="logo-text">Vektia</span>
+                    <span class="logo-badge">v0.1</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Ana Menü</div>
+                <a href="index.html" class="nav-item" data-page="dashboard"><span class="nav-icon">📊</span> Dashboard</a>
+
+                <div class="nav-section-label">Sistem</div>
+                <a href="settings.html" class="nav-item active" data-page="settings"><span class="nav-icon">⚙️</span> Ayarlar</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">A</div>
+                    <div class="user-details"><div class="user-name">Admin</div><div class="user-role">Yönetici</div></div>
+                    <button class="btn btn-ghost btn-sm" onclick="VektiaAPI.logout()">🚪</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <h1 class="header-title">⚙️ Sistem Ayarları</h1>
+            </header>
+
+            <div class="page-content">
+                <!-- Sistem Durumu -->
+                <div class="card" style="margin-bottom: var(--space-lg);">
+                    <div class="card-header">
+                        <span class="card-title">Sistem Durumu</span>
+                        <button class="btn btn-ghost btn-sm" onclick="loadSystemStats()">🔄 Yenile</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid" style="margin-bottom: 0;">
+                            <div class="stat-card purple">
+                                <div class="stat-card-header">
+                                    <span class="stat-label">Redis Bellek</span>
+                                    <div class="stat-icon purple">💾</div>
+                                </div>
+                                <div class="stat-value" id="redisMemory" style="font-size: 1.5rem;">—</div>
+                            </div>
+                            <div class="stat-card orange">
+                                <div class="stat-card-header">
+                                    <span class="stat-label">ML Kuyruğu</span>
+                                    <div class="stat-icon orange">🤖</div>
+                                </div>
+                                <div class="stat-value" id="mlQueueSize" style="font-size: 1.5rem;">—</div>
+                            </div>
+                            <div class="stat-card blue">
+                                <div class="stat-card-header">
+                                    <span class="stat-label">Şüpheli Havuzu</span>
+                                    <div class="stat-icon blue">🔍</div>
+                                </div>
+                                <div class="stat-value" id="suspiciousPool" style="font-size: 1.5rem;">—</div>
+                            </div>
+                            <div class="stat-card red">
+                                <div class="stat-card-header">
+                                    <span class="stat-label">Onaylanmış Havuz</span>
+                                    <div class="stat-icon red">🎯</div>
+                                </div>
+                                <div class="stat-value" id="confirmedPool" style="font-size: 1.5rem;">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Bilgileri -->
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">API Bağlantı Bilgileri</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group" style="margin-bottom: var(--space-md);">
+                                <label class="form-label">API Base URL</label>
+                                <input type="text" class="form-input" value="" id="apiUrl" readonly style="font-family: var(--font-mono); font-size: 0.82rem;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: var(--space-md);">
+                                <label class="form-label">WebSocket Telemetri</label>
+                                <input type="text" class="form-input" value="" id="wsUrl" readonly style="font-family: var(--font-mono); font-size: 0.82rem;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">API Docs</label>
+                                <a href="/api/docs" target="_blank" class="btn btn-ghost btn-sm">📚 Swagger Docs Aç</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Tespit Eşikleri</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group" style="margin-bottom: var(--space-md);">
+                                <label class="form-label">Bot Eşik Değeri (std_dev)</label>
+                                <input type="text" class="form-input" value="0.005" readonly style="font-family: var(--font-mono);">
+                                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Bu sapmanın altındaki ritimler bot olarak işaretlenir</div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: var(--space-md);">
+                                <label class="form-label">Şüpheli Eşik Değeri</label>
+                                <input type="text" class="form-input" value="0.02" readonly style="font-family: var(--font-mono);">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Pencere Boyutu (MAX_WINDOW)</label>
+                                <input type="text" class="form-input" value="20" readonly style="font-family: var(--font-mono);">
+                                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Analiz için saklanacak son eylem sayısı</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        if (!requireAuth()) throw new Error('Auth required');
+
+        // URL'leri ayarla
+        document.getElementById('apiUrl').value = `${window.location.origin}/api/v1/telemetry/event`;
+        const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        document.getElementById('wsUrl').value = `${wsProto}//${window.location.host}/api/v1/telemetry/stream`;
+
+        async function loadSystemStats() {
+            try {
+                const data = await VektiaAPI.getStats();
+                document.getElementById('redisMemory').textContent = data.redis_memory || '—';
+                document.getElementById('mlQueueSize').textContent = data.ml_queue_size || 0;
+                document.getElementById('suspiciousPool').textContent = data.suspicious_pool_size || 0;
+                document.getElementById('confirmedPool').textContent = data.confirmed_pool_size || 0;
+            } catch (err) {
+                console.error('Stats hatası:', err);
+            }
+        }
+
+        loadSystemStats();
+        setInterval(loadSystemStats, 30000);
+    </script>
+</body>
+</html>

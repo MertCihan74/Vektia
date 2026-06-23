@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="title_dashboard">Vektia — Stüdyo Paneli</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <style>
+        .customer-sidebar { width: 220px; }
+        .customer-header { background: var(--bg-card); padding: 1rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- ═══ SIDEBAR ═══ -->
+        <aside class="sidebar" style="width: 260px;">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="logo-icon">V</div>
+                    <span class="logo-text">Vektia</span>
+                    <span class="badge" id="tierBadge" style="margin-left:auto; font-size:0.7rem;"></span>
+                </div>
+            </div>
+            
+            <div style="padding: 1rem; color: var(--primary-color); font-weight: 500; border-bottom: 1px solid var(--border-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="clientNameDisplay">
+                Yükleniyor...
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Stüdyo Menüsü</div>
+                <a href="customer.html" class="nav-item active">
+                    <span class="nav-icon">📊</span>
+                    <span data-i18n="menu_dashboard">Dashboard</span>
+                </a>
+                <a href="customer_players.html" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span data-i18n="menu_users">Kullanıcılar</span>
+                </a>
+                <a href="customer_billing.html" class="nav-item">
+                    <span class="nav-icon">💳</span>
+                    <span data-i18n="menu_billing">Üyelik Bilgilerim</span>
+                </a>
+                <a href="customer_settings.html" class="nav-item">
+                    <span class="nav-icon">⚙️</span>
+                    <span data-i18n="menu_settings">Ayarlar</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn btn-ghost" style="width: 100%; text-align: left; display: flex; align-items: center; gap: 0.5rem;" onclick="logoutCustomer()">
+                    🚪 <span data-i18n="menu_logout">Çıkış Yap</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ═══ MAIN CONTENT ═══ -->
+        <main class="main-content">
+            <header class="top-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <h1 class="header-title" data-i18n="title_dashboard">Stüdyo Dashboard</h1>
+                <select id="langSelect" class="input-field" style="width:auto; padding:0.25rem; height:auto; background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--text-color);" onchange="i18n.setLang(this.value)">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="tr">🇹🇷 TR</option>
+                </select>
+            </header>
+
+            <div class="page-content">
+                <!-- Free Tier Banner -->
+                <div id="freeTierBanner" style="display: none; background: rgba(255, 153, 0, 0.1); border: 1px solid var(--accent-orange); color: var(--text-color); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 2rem;">
+                    <strong>⚠️ Ücretsiz Deneme (Free-Tier) Kullanıyorsunuz</strong><br>
+                    Güvenlik politikalarımız gereği oyuncu kimlikleri (Player ID) ücretsiz sürümde gizlenmiştir. 
+                    Gerçek kimlikleri görmek ve otomatik yasaklama/beyaz liste aksiyonlarını almak için <a href="customer_billing.html" style="color: var(--accent-orange); text-decoration: underline; font-weight: bold;">Premium'a Geçin</a>.
+                </div>
+                
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card blue">
+                        <div class="stat-card-header"><span class="stat-label" data-i18n="card_total_users">Toplam Kullanıcı</span><div class="stat-icon blue">👥</div></div>
+                        <div class="stat-value" id="cTotalPlayers">—</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-card-header"><span class="stat-label" data-i18n="card_active_users">Aktif Kullanıcı</span><div class="stat-icon green">✅</div></div>
+                        <div class="stat-value" id="cActivePlayers">—</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-card-header"><span class="stat-label" data-i18n="card_flagged_users">İşaretli (Riskli)</span><div class="stat-icon orange">⚠️</div></div>
+                        <div class="stat-value" id="cFlaggedPlayers">—</div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-card-header"><span class="stat-label" data-i18n="card_banned_users">Banlanan</span><div class="stat-icon red">🚫</div></div>
+                        <div class="stat-value" id="cBannedPlayers">—</div>
+                    </div>
+                </div>
+
+                <div class="grid-3" style="margin-top: 2rem;">
+                    <!-- Timeline Chart -->
+                    <div class="card" style="grid-column: span 2;">
+                        <div class="card-header"><span class="card-title" data-i18n="timeline_title">Tespit Zaman Serisi (Son 1 Saat)</span></div>
+                        <div class="card-body">
+                            <div class="chart-container"><canvas id="cDetectionChart"></canvas></div>
+                        </div>
+                    </div>
+                    <!-- Alerts Feed -->
+                    <div class="card">
+                        <div class="card-header"><span class="card-title" data-i18n="alerts_title">Son Uyarılar</span></div>
+                        <div class="card-body">
+                            <div class="alert-feed" id="cAlertFeed" style="max-height: 300px; overflow-y: auto;">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/charts.js"></script>
+    <script>
+        if (!VektiaAPI.getToken()) {
+            window.location.href = 'customer_login.html';
+        }
+
+        async function loadCustomerDashboard() {
+            try {
+                // Özel müşteri endpoint'i
+                const response = await VektiaAPI.request('/api/v1/customer/dashboard');
+                
+                document.getElementById('clientNameDisplay').textContent = response.client_name || 'Müşteri';
+                
+                const tierBadge = document.getElementById('tierBadge');
+                if (response.tier === 'free') {
+                    tierBadge.className = 'badge badge-low';
+                    tierBadge.textContent = 'FREE TIER';
+                    document.getElementById('freeTierBanner').style.display = 'block';
+                } else {
+                    tierBadge.className = 'badge badge-high';
+                    tierBadge.textContent = 'PREMIUM';
+                    document.getElementById('freeTierBanner').style.display = 'none';
+                }
+
+                document.getElementById('cTotalPlayers').textContent = response.total_players || 0;
+                document.getElementById('cActivePlayers').textContent = response.active_players || 0;
+                document.getElementById('cFlaggedPlayers').textContent = response.flagged_players || 0;
+                document.getElementById('cBannedPlayers').textContent = response.banned_players || 0;
+
+                if (response.chart_data) {
+                    createDetectionChart('cDetectionChart', response.chart_data.timeline);
+                }
+            } catch (err) {
+                console.error(err);
+                if (err.message.includes('Oturum') || err.message.includes('Yetkisiz')) {
+                    logoutCustomer();
+                }
+            }
+        }
+
+        async function loadCustomerAlerts() {
+            try {
+                const response = await VektiaAPI.request('/api/v1/customer/alerts?limit=15');
+                const container = document.getElementById('cAlertFeed');
+                
+                if (!response.alerts || response.alerts.length === 0) {
+                    container.innerHTML = `<div class="empty-state">Temiz, uyarı yok.</div>`;
+                    return;
+                }
+
+                container.innerHTML = response.alerts.map(a => `
+                    <div class="alert-item" style="padding: 10px; border-bottom: 1px solid var(--border-color);">
+                        <div style="font-weight: 500; font-family: monospace;">${a.player_id}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">
+                            Risk: ${(a.score * 100).toFixed(0)}% | Katman: ${a.layer} | ${new Date(a.detected_at).toLocaleTimeString('tr-TR')}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function logoutCustomer() {
+            VektiaAPI.clearToken();
+            window.location.href = 'customer_login.html';
+        }
+
+        loadCustomerDashboard();
+        loadCustomerAlerts();
+        
+        window.addEventListener('languageChanged', () => {
+            loadCustomerDashboard();
+            loadCustomerAlerts();
+        });
+        setInterval(() => {
+            loadCustomerDashboard();
+            loadCustomerAlerts();
+        }, 60000);
+    </script>
+</body>
+</html>

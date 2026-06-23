@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="title_billing">Vektia — Üyelik Bilgilerim</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- ═══ SIDEBAR ═══ -->
+        <aside class="sidebar" style="width: 260px;">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="logo-icon">V</div>
+                    <span class="logo-text">Vektia</span>
+                    <span class="badge" id="tierBadge" style="margin-left:auto; font-size:0.7rem;"></span>
+                </div>
+            </div>
+            
+            <div style="padding: 1rem; color: var(--primary-color); font-weight: 500; border-bottom: 1px solid var(--border-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="clientNameDisplay">
+                Yükleniyor...
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Stüdyo Menüsü</div>
+                <a href="customer.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span data-i18n="menu_dashboard">Dashboard</span>
+                </a>
+                <a href="customer_players.html" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span data-i18n="menu_users">Kullanıcılar</span>
+                </a>
+                <a href="customer_billing.html" class="nav-item active">
+                    <span class="nav-icon">💳</span>
+                    <span data-i18n="menu_billing">Üyelik Bilgilerim</span>
+                </a>
+                <a href="customer_settings.html" class="nav-item">
+                    <span class="nav-icon">⚙️</span>
+                    <span data-i18n="menu_settings">Ayarlar</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn btn-ghost" style="width: 100%; text-align: left; display: flex; align-items: center; gap: 0.5rem;" onclick="logoutCustomer()">
+                    🚪 <span data-i18n="menu_logout">Çıkış Yap</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ═══ MAIN CONTENT ═══ -->
+        <main class="main-content">
+            <header class="top-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <h1 class="header-title" data-i18n="title_billing">Fatura ve Abonelik</h1>
+                <select id="langSelect" class="input-field" style="width:auto; padding:0.25rem; height:auto; background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--text-color);" onchange="i18n.setLang(this.value)">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="tr">🇹🇷 TR</option>
+                </select>
+            </header>
+
+            <div class="page-content">
+                <div class="card" style="max-width: 600px; margin: 0 auto;">
+                    <div class="card-header">
+                        <span class="card-title">Mevcut Abonelik Detayları</span>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                                <div>
+                                    <h3 style="font-size: 1rem; color: var(--text-muted); margin-bottom: 0.5rem;">Mevcut Paket</h3>
+                                    <div id="billingTier" style="font-size: 1.5rem; font-weight: bold; color: var(--text-color);">Yükleniyor...</div>
+                                </div>
+                                <div id="billingStatusBadge" class="badge">Yükleniyor</div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <h3 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.25rem;">Kayıt Tarihi</h3>
+                                    <div id="billingCreatedAt" style="font-size: 1rem;">-</div>
+                                </div>
+                                <div>
+                                    <h3 id="billingEndDateTitle" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.25rem;">Sonraki Ödeme Tarihi</h3>
+                                    <div id="billingEndDate" style="font-size: 1rem;">-</div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 1rem;" id="billingActions">
+                                <!-- JS ile butonlar gelecek (Premium'a Yükselt veya İptal Et) -->
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        if (!VektiaAPI.getToken()) {
+            window.location.href = 'customer_login.html';
+        }
+
+        async function init() {
+            try {
+                const response = await VektiaAPI.request('/api/v1/customer/dashboard');
+                document.getElementById('clientNameDisplay').textContent = response.client_name || 'Müşteri';
+                
+                const tierBadge = document.getElementById('tierBadge');
+                const isPremium = response.tier === 'premium';
+                
+                if (isPremium) {
+                    tierBadge.className = 'badge badge-high';
+                    tierBadge.textContent = 'PREMIUM';
+                    document.getElementById('billingTier').textContent = i18n.t('plan_premium');
+                    document.getElementById('billingTier').style.color = 'var(--primary-color)';
+                } else {
+                    tierBadge.className = 'badge badge-low';
+                    tierBadge.textContent = 'FREE TIER';
+                    document.getElementById('billingTier').textContent = i18n.t('plan_free');
+                    document.getElementById('billingTier').style.color = 'var(--accent-orange)';
+                }
+
+                const billing = response.billing || {};
+                
+                // Durum Rozeti
+                const statusBadge = document.getElementById('billingStatusBadge');
+                if (billing.status === 'active') {
+                    statusBadge.className = 'badge badge-success';
+                    statusBadge.textContent = i18n.t('status_active');
+                } else if (billing.status === 'canceled') {
+                    statusBadge.className = 'badge badge-danger';
+                    statusBadge.textContent = i18n.t('status_canceled');
+                } else if (billing.status === 'past_due') {
+                    statusBadge.className = 'badge badge-danger';
+                    statusBadge.textContent = i18n.t('status_past_due');
+                } else {
+                    statusBadge.className = 'badge badge-low';
+                    statusBadge.textContent = i18n.t('status_trial');
+                }
+
+                // Tarihler
+                if (billing.created_at) {
+                    document.getElementById('billingCreatedAt').textContent = new Date(billing.created_at).toLocaleDateString('tr-TR');
+                }
+                if (billing.end_date) {
+                    document.getElementById('billingEndDate').textContent = new Date(billing.end_date).toLocaleDateString('tr-TR');
+                } else if (billing.created_at) {
+                    const start = new Date(billing.created_at);
+                    if (isPremium) {
+                        // Premium: Kayıt tarihinden yola çıkarak bu ayki veya sonraki ayki fatura tarihi
+                        const today = new Date();
+                        let nextBilling = new Date(start);
+                        nextBilling.setFullYear(today.getFullYear());
+                        nextBilling.setMonth(today.getMonth());
+                        if (nextBilling <= today) {
+                            nextBilling.setMonth(nextBilling.getMonth() + 1);
+                        }
+                        document.getElementById('billingEndDate').textContent = nextBilling.toLocaleDateString('tr-TR');
+                    } else {
+                        // Free trial bitiş tarihi (+7 gün)
+                        const end = new Date(start);
+                        end.setDate(end.getDate() + 7);
+                        document.getElementById('billingEndDate').textContent = end.toLocaleDateString('tr-TR');
+                    }
+                }
+                
+                if (!isPremium) {
+                    document.getElementById('billingEndDateTitle').textContent = 'Free-Tier Bitiş Tarihi';
+                }
+
+                // Aksiyon Butonları
+                const actionsDiv = document.getElementById('billingActions');
+                let buttonsHtml = '';
+
+                if (isPremium) {
+                    if (billing.status === 'active') {
+                        buttonsHtml += `
+                            <button class="btn btn-outline" style="width: 100%; margin-bottom: 0.5rem; color: var(--accent-red); border-color: var(--accent-red);" onclick="cancelSubscription()">
+                                ${i18n.t('btn_cancel_sub')}
+                            </button>
+                        `;
+                    } else if (billing.status === 'canceled') {
+                        buttonsHtml += `
+                            <div style="background: rgba(255, 153, 0, 0.1); border: 1px solid var(--accent-orange); color: var(--text-color); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; text-align: center; font-size: 0.9rem;">
+                                <strong>Abonelik İptal Edildi</strong><br>
+                                Fatura kesim tarihine kadar Premium ayrıcalıklarından faydalanmaya devam edebilirsiniz.
+                            </div>
+                        `;
+                    }
+                } else {
+                    buttonsHtml += `
+                        <button class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 1rem; margin-bottom: 1rem;" onclick="upgradeToPremium()">
+                            🚀 Hemen Premium'a Yükselt
+                        </button>
+                    `;
+                }
+
+                // Hesabı Sil butonu her durumda en altta yer alsın (ancak aktif premium ise API engelleyecek)
+                buttonsHtml += `
+                    <button class="btn btn-ghost" style="width: 100%; color: var(--text-muted);" onclick="deleteAccount()">
+                        Hesabı Sil
+                    </button>
+                `;
+
+                actionsDiv.innerHTML = buttonsHtml;
+
+            } catch (err) {
+                if (err.message.includes('Oturum')) logoutCustomer();
+            }
+        }
+
+        async function upgradeToPremium() {
+            try {
+                const response = await VektiaAPI.request('/api/v1/billing/create-checkout-session', {
+                    method: 'POST',
+                    body: JSON.stringify({ tier: 'premium' })
+                });
+                
+                if (response.checkout_url) {
+                    window.location.href = response.checkout_url;
+                }
+            } catch (err) {
+                alert('Yönlendirme başarısız: ' + err.message);
+            }
+        }
+
+        async function cancelSubscription() {
+            if (!confirm('Aboneliğinizi iptal etmek istediğinize emin misiniz? Fatura dönemine kadar hizmeti kullanmaya devam edebilirsiniz.')) return;
+            try {
+                const response = await VektiaAPI.request('/api/v1/billing/cancel-subscription', {
+                    method: 'POST'
+                });
+                alert(response.message);
+                window.location.reload();
+            } catch (err) {
+                alert('İptal başarısız: ' + err.message);
+            }
+        }
+
+        async function deleteAccount() {
+            if (!confirm('Tüm oyuncu verileriniz ve Vektia hesabınız geri döndürülemez şekilde silinecektir. Emin misiniz?')) return;
+            try {
+                const response = await VektiaAPI.request('/api/v1/customer/account', {
+                    method: 'DELETE'
+                });
+                alert(response.message);
+                logoutCustomer();
+            } catch (err) {
+                alert('Hesap silme başarısız: ' + err.message);
+            }
+        }
+
+        function logoutCustomer() {
+            VektiaAPI.clearToken();
+            window.location.href = 'customer_login.html';
+        }
+
+        init();
+    </script>
+</body>
+</html>

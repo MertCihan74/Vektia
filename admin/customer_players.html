@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="title_users">Vektia — Kullanıcılar (Müşteri)</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- ═══ SIDEBAR ═══ -->
+        <aside class="sidebar" style="width: 260px;">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="logo-icon">V</div>
+                    <span class="logo-text">Vektia</span>
+                    <span class="badge" id="tierBadge" style="margin-left:auto; font-size:0.7rem;"></span>
+                </div>
+            </div>
+            
+            <div style="padding: 1rem; color: var(--primary-color); font-weight: 500; border-bottom: 1px solid var(--border-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="clientNameDisplay">
+                Yükleniyor...
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Stüdyo Menüsü</div>
+                <a href="customer.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span data-i18n="menu_dashboard">Dashboard</span>
+                </a>
+                <a href="customer_players.html" class="nav-item active">
+                    <span class="nav-icon">👥</span>
+                    <span data-i18n="menu_users">Kullanıcılar</span>
+                </a>
+                <a href="customer_billing.html" class="nav-item">
+                    <span class="nav-icon">💳</span>
+                    <span data-i18n="menu_billing">Üyelik Bilgilerim</span>
+                </a>
+                <a href="customer_settings.html" class="nav-item">
+                    <span class="nav-icon">⚙️</span>
+                    <span data-i18n="menu_settings">Ayarlar</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn btn-ghost" style="width: 100%; text-align: left; display: flex; align-items: center; gap: 0.5rem;" onclick="logoutCustomer()">
+                    🚪 <span data-i18n="menu_logout">Çıkış Yap</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ═══ MAIN CONTENT ═══ -->
+        <main class="main-content">
+            <header class="top-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <h1 class="header-title" data-i18n="title_users">Kullanıcı Yönetimi</h1>
+                <select id="langSelect" class="input-field" style="width:auto; padding:0.25rem; height:auto; background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--text-color);" onchange="i18n.setLang(this.value)">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="tr">🇹🇷 TR</option>
+                </select>
+            </header>
+
+            <div class="page-content">
+                <div id="premiumLock" style="display:none; background: rgba(255, 0, 0, 0.1); border: 1px solid var(--danger-color); color: var(--text-color); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; text-align: center;">
+                    <strong data-i18n="modal_action_premium">🔒 Premium Özellik</strong><br>
+                    <span data-i18n="modal_upgrade_msg">Kullanıcıları direkt olarak banlamak/beyaz listeye almak için Premium pakete sahip olmalısınız.</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title" data-i18n="filter_all">Tüm Kullanıcılar</span>
+                        <div class="card-actions" style="display:flex; gap:10px; align-items:center;">
+                            <select id="playerFilter" class="input-field" style="width:auto; padding:0.25rem 0.5rem; height:auto; background:var(--bg-secondary); color:var(--text-color); border:1px solid var(--border-color);" onchange="renderPlayers()">
+                                <option value="most_events" data-i18n="filter_most_events">En Çok Vukuatı Olanlar</option>
+                                <option value="high_risk" data-i18n="filter_high_risk">Sadece Yüksek Riskliler (High)</option>
+                                <option value="suspicious" data-i18n="filter_suspicious">Sadece Şüpheliler (Suspicious)</option>
+                                <option value="clean" data-i18n="filter_clean">Sadece Temizler (Clean/Low)</option>
+                                <option value="banned" data-i18n="filter_banned">Banlı Kullanıcılar</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" onclick="loadCustomerPlayers()" data-i18n="btn_refresh">Yenile</button>
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_user_id">Kullanıcı ID</th>
+                                        <th data-i18n="th_risk_score">Risk Skoru</th>
+                                        <th data-i18n="th_risk_level">Risk Seviyesi</th>
+                                        <th data-i18n="th_total_events">Toplam Olay</th>
+                                        <th data-i18n="th_status">Mevcut Durum</th>
+                                        <th style="text-align: right;" data-i18n="btn_inspect">Aksiyon</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="playersTableBody">
+                                    <tr><td colspan="6" style="text-align: center; padding: 2rem;">Yükleniyor...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- Oyuncu Detay Modalı -->
+    <style>
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+    <dialog id="playerModal" class="modal" style="border:1px solid var(--border-color); border-radius:var(--radius-xl); background:var(--bg-secondary); color:var(--text-primary); padding:0; width:400px; max-width:90vw; box-shadow:var(--shadow-lg);">
+        <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="margin:0; font-size:1.2rem; display:flex; align-items:center; gap:10px;">
+                <span class="nav-icon">👤</span> 
+                <span id="modalPlayerId">Kullanıcı ID</span>
+            </h2>
+            <button class="btn btn-ghost" onclick="closePlayerModal()" style="padding:4px 8px;">✕</button>
+        </div>
+        <div style="padding:20px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span style="color:var(--text-muted);">Risk Skoru:</span>
+                <strong id="modalRiskScore">—</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span style="color:var(--text-muted);">Risk Seviyesi:</span>
+                <strong id="modalRiskLevel">—</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span style="color:var(--text-muted);">İşaretlenme (Flag) Sayısı:</span>
+                <strong id="modalFlaggedCount">—</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <span style="color:var(--text-muted);">Toplam Olay (Event):</span>
+                <strong id="modalTotalEvents">—</strong>
+            </div>
+            
+            <div id="modalActions" style="display:flex; gap:10px; margin-top:20px; padding-top:20px; border-top:1px solid var(--border-color);">
+                <!-- JS tarafından doldurulacak -->
+            </div>
+        </div>
+    </dialog>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        if (!VektiaAPI.getToken()) {
+            window.location.href = 'customer_login.html';
+        }
+
+        let isPremium = true;
+
+        async function init() {
+            try {
+                const response = await VektiaAPI.request('/api/v1/customer/dashboard');
+                document.getElementById('clientNameDisplay').textContent = response.client_name || 'Müşteri';
+                
+                const tierBadge = document.getElementById('tierBadge');
+                if (response.tier === 'free') {
+                    tierBadge.className = 'badge badge-low';
+                    tierBadge.textContent = 'FREE TIER';
+                    isPremium = false;
+                    document.getElementById('premiumLock').style.display = 'block';
+                } else {
+                    tierBadge.className = 'badge badge-high';
+                    tierBadge.textContent = 'PREMIUM';
+                    isPremium = true;
+                    document.getElementById('premiumLock').style.display = 'none';
+                }
+                
+                loadCustomerPlayers();
+            } catch (err) {
+                if (err.message.includes('Oturum')) logoutCustomer();
+            }
+        }
+
+        async function loadCustomerPlayers() {
+            const tbody = document.getElementById('playersTableBody');
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem;">${i18n.t('loading')}</td></tr>`;
+            try {
+                const response = await VektiaAPI.request('/api/v1/customer/players?limit=100');
+                
+                if (!response.players || response.players.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem;">${i18n.t('no_users')}</td></tr>`;
+                    return;
+                }
+
+                // Deduplicate by player_id
+                const uniquePlayersMap = new Map();
+                response.players.forEach(p => {
+                    if (!uniquePlayersMap.has(p.player_id) || p.risk_score > uniquePlayersMap.get(p.player_id).risk_score) {
+                        uniquePlayersMap.set(p.player_id, p);
+                    }
+                });
+                const uniquePlayers = Array.from(uniquePlayersMap.values());
+                window.currentPlayers = uniquePlayersMap;
+                
+                renderPlayers();
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color:var(--danger-color);">Hata oluştu.</td></tr>`;
+            }
+        }
+
+        function renderPlayers() {
+            const tbody = document.getElementById('playersTableBody');
+            const filterValue = document.getElementById('playerFilter').value;
+            
+            if (!window.currentPlayers || window.currentPlayers.size === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem;">Oyuncu bulunamadı.</td></tr>`;
+                return;
+            }
+
+            let players = Array.from(window.currentPlayers.values());
+
+            // Filtreleme
+            if (filterValue === 'high_risk') {
+                players = players.filter(p => p.risk_level === 'high' || p.risk_level === 'confirmed');
+            } else if (filterValue === 'suspicious') {
+                players = players.filter(p => p.risk_level === 'suspicious');
+            } else if (filterValue === 'clean') {
+                players = players.filter(p => p.risk_level === 'clean' || p.risk_level === 'low');
+            } else if (filterValue === 'banned') {
+                players = players.filter(p => p.status === 'banned');
+            }
+
+            // Sıralama
+            if (filterValue === 'most_events') {
+                players.sort((a, b) => b.total_events - a.total_events);
+            } else {
+                players.sort((a, b) => b.risk_score - a.risk_score);
+            }
+            
+            if (players.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem;">${i18n.t('no_users')}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = players.map(p => `
+                <tr>
+                    <td style="font-family: monospace; display:flex; align-items:center; gap:8px;">
+                        <button class="btn btn-ghost btn-sm" style="padding:2px 6px;" onclick="toggleIncidents('${p.player_id}')">▼</button>
+                        ${p.player_id}
+                    </td>
+                    <td>${(p.risk_score * 100).toFixed(0)}%</td>
+                    <td><span class="badge badge-${p.risk_level}">${p.risk_level}</span></td>
+                    <td>${p.total_events}</td>
+                    <td><span class="badge badge-${p.status}">${p.status}</span></td>
+                    <td style="text-align: right;">
+                        <button class="btn btn-outline btn-sm" onclick="openPlayerModal('${p.player_id}')">${i18n.t('btn_inspect')}</button>
+                    </td>
+                </tr>
+                <tr id="incidents-${p.player_id}" style="display:none; background:rgba(255,255,255,0.02);">
+                    <td colspan="6" style="padding: 1rem;">
+                        <div id="incidents-content-${p.player_id}">${i18n.t('loading')}</div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function toggleIncidents(playerId) {
+            const tr = document.getElementById(`incidents-${playerId}`);
+            const content = document.getElementById(`incidents-content-${playerId}`);
+            
+            if (tr.style.display === 'none') {
+                tr.style.display = 'table-row';
+                content.innerHTML = `<div style="color:var(--text-muted); font-size:0.9rem;">${i18n.t('msg_incidents_loading')}</div>`;
+                try {
+                    const resp = await VektiaAPI.request(`/api/v1/customer/alerts?player_id=${encodeURIComponent(playerId)}`);
+                    if (!resp.alerts || resp.alerts.length === 0) {
+                        content.innerHTML = `<div style="color:var(--text-muted); font-size:0.9rem;">${i18n.t('msg_no_incidents')}</div>`;
+                    } else {
+                        content.innerHTML = `
+                            <table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+                                <tr style="border-bottom:1px solid var(--border-color); color:var(--text-muted);">
+                                    <th style="padding:4px; text-align:left;">${i18n.t('th_layer')}</th>
+                                    <th style="padding:4px; text-align:left;">${i18n.t('th_risk_level')}</th>
+                                    <th style="padding:4px; text-align:left;">${i18n.t('th_risk_score')}</th>
+                                    <th style="padding:4px; text-align:right;">${i18n.t('th_date')}</th>
+                                </tr>
+                                ${resp.alerts.map(a => `
+                                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                                        <td style="padding:4px;">${a.layer}</td>
+                                        <td style="padding:4px;"><span class="badge badge-${a.risk_level}">${a.risk_level}</span></td>
+                                        <td style="padding:4px;">${(a.score * 100).toFixed(0)}%</td>
+                                        <td style="padding:4px; text-align:right; color:var(--text-muted);">${new Date(a.detected_at).toLocaleString()}</td>
+                                    </tr>
+                                `).join('')}
+                            </table>
+                        `;
+                    }
+                } catch (err) {
+                    content.innerHTML = `<div style="color:var(--danger-color); font-size:0.9rem;">Yükleme hatası.</div>`;
+                }
+            } else {
+                tr.style.display = 'none';
+            }
+        }
+
+        function openPlayerModal(playerId) {
+            const p = window.currentPlayers?.get(playerId);
+            if (!p) return;
+            
+            document.getElementById('modalPlayerId').textContent = playerId;
+            document.getElementById('modalRiskScore').textContent = (p.risk_score * 100).toFixed(0) + '%';
+            document.getElementById('modalRiskLevel').innerHTML = `<span class="badge badge-${p.risk_level}">${p.risk_level}</span>`;
+            document.getElementById('modalFlaggedCount').textContent = p.flagged_count;
+            document.getElementById('modalTotalEvents').textContent = p.total_events;
+            
+            // Eğer premium değilse, butonları kilitle veya gizle
+            if (!isPremium) {
+                document.getElementById('modalActions').innerHTML = `<div style="color:var(--text-muted); text-align:center; padding:10px; font-size:0.9rem; width:100%;">${i18n.t('modal_upgrade_msg')}</div>`;
+            } else {
+                document.getElementById('modalActions').innerHTML = `
+                    <button class="btn btn-danger" style="flex:1;" onclick="updatePlayerStatus('${playerId}', 'banned')">${i18n.t('btn_ban')}</button>
+                    <button class="btn btn-ghost" style="flex:1;" onclick="updatePlayerStatus('${playerId}', 'active')">${i18n.t('btn_whitelist')}</button>
+                `;
+            }
+            
+            document.getElementById('playerModal').showModal();
+        }
+
+        function closePlayerModal() {
+            document.getElementById('playerModal').close();
+        }
+
+        async function updatePlayerStatus(playerId, status) {
+            if (!isPremium) return;
+            try {
+                await VektiaAPI.request(`/api/v1/customer/players/${playerId}/status`, {
+                    method: 'POST',
+                    body: JSON.stringify({ status: status, ban_reason: "Customer dashboard request" })
+                });
+                closePlayerModal();
+                loadCustomerPlayers();
+            } catch (err) {
+                alert('Hata: ' + err.message);
+            }
+        }
+
+        function logoutCustomer() {
+            VektiaAPI.clearToken();
+            window.location.href = 'customer_login.html';
+        }
+
+        init();
+    </script>
+</body>
+</html>

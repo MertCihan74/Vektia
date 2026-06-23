@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gizlilik Politikası (KVKK) | Vektia</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --surface-color: #111111;
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent-cyan: #06b6d4;
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #27272a;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.5rem 5%; background: rgba(5,5,5,0.8);
+            backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; display:flex; align-items:center; gap:0.5rem; text-decoration: none; color: white;}
+        .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary-color), var(--accent-cyan)); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-weight:900; }
+        
+        .container {
+            max-width: 800px;
+            margin: 4rem auto;
+            padding: 0 1.5rem;
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 1rem; background: linear-gradient(to right, #fff, #9ca3af); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
+        h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; color: #fff;}
+        p, li { color: var(--text-muted); margin-bottom: 1rem; }
+        ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 2rem 5%;
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 4rem;
+        }
+        footer a { color: var(--text-muted); text-decoration: none; margin: 0 1rem; transition: color 0.2s;}
+        footer a:hover { color: var(--text-color); }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">
+            <div class="logo-icon">V</div>
+            Vektia
+        </a>
+    </nav>
+
+    <div class="container">
+        <h1>Gizlilik Politikası (KVKK ve GDPR)</h1>
+        <p>Son Güncelleme: 23 Haziran 2026</p>
+
+        <p>Vektia olarak, mahremiyetinize ve kişisel verilerinizin güvenliğine büyük önem veriyoruz. Bu metin, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) ve Avrupa Genel Veri Koruma Yönetmeliği (GDPR) kapsamında veri işleme faaliyetlerimizi açıklamaktadır.</p>
+
+        <h2>1. Veri Sorumlusu ve Veri İşleyen Rolleri</h2>
+        <p>Vektia, bir B2B SaaS hizmeti olup Müşterilerine (Oyun stüdyoları, yazılım firmaları) anti-fraud (bot tespit) altyapısı sunar. Bu bağlamda:</p>
+        <ul>
+            <li><strong>Veri Sorumlusu (Data Controller):</strong> Hizmetimizi kullanan Müşteri'dir. Müşteri, kendi platformundaki son kullanıcıları (oyuncuları) aydınlatmakla ve gerekli rızaları almakla yükümlüdür.</li>
+            <li><strong>Veri İşleyen (Data Processor):</strong> Vektia'dır. Biz sadece Müşteri'nin bize API üzerinden gönderdiği telemetri verilerini sözleşme amaçlarına (bot tespiti) uygun şekilde işleriz.</li>
+        </ul>
+
+        <h2>2. Hangi Verileri Topluyoruz?</h2>
+        <p>Vektia, Müşterilerin bize ilettiği şu telemetri ve analitik verilerini toplar:</p>
+        <ul>
+            <li><strong>Davranışsal Veriler:</strong> Fare (mouse) hareket koordinatları, tıklama süreleri, tuş basım gecikmeleri, scroll eylemleri.</li>
+            <li><strong>Sistem Metrikleri:</strong> Gelen isteklerin timestamp (zaman damgası) bilgileri.</li>
+            <li><strong>Tanımlayıcılar:</strong> Müşteri tarafından atanan rastgele veya spesifik <code>player_id</code> değerleri. (Vektia, bu değerlerin maskelenmiş "UUID" formatında veya hash'lenmiş olarak gönderilmesini şiddetle tavsiye eder).</li>
+            <li><strong>İstemci Verisi (Müşterilerimiz için):</strong> Vektia'ya kayıt olan stüdyoların isimleri, kurumsal e-posta adresleri, fatura bilgileri ve şifreli şifre/API anahtarları.</li>
+        </ul>
+
+        <h2>3. Verileri Neden ve Nasıl İşliyoruz?</h2>
+        <p>Telemetri verileri (oyuncu davranışları), sistemimizdeki istatistiksel modeller ve Derin Öğrenme (LSTM) algoritmaları tarafından analiz edilir. Amacımız makro yazılımlarını, hileleri ve otomatik botları gerçek insan davranışlarından ayırt etmektir.</p>
+        <p>Oyunculara ait davranışsal veriler, sistemin yapay zeka modelini eğitmek (sürekli öğrenme) ve doğruluğu artırmak için <strong>anonimleştirilerek</strong> kullanılabilir.</p>
+
+        <h2>4. Veri Güvenliği ve Saklama</h2>
+        <p>Vektia, gönderilen tüm verileri şifrelenmiş kanallar (HTTPS/WSS) üzerinden alır. Verileriniz, dünya standartlarındaki bulut altyapılarında şifreli olarak barındırılır.</p>
+        <ul>
+            <li>İşlenen telemetri olayları (events), anlık olarak Redis üzerinde tutulur ve analiz sonrasında düzenli olarak bellekten silinir.</li>
+            <li>Sadece anomali ve risk skorlamaları kalıcı olarak PostgreSQL veritabanında saklanır.</li>
+            <li>Aboneliğini sonlandıran Müşterilerin tüm telemetri kayıtları ve tespit skorları sistemden kalıcı olarak silinir.</li>
+        </ul>
+
+        <h2>5. Kişisel Veri Paylaşımı</h2>
+        <p>Vektia, Müşterilerin verilerini ve telemetri analiz sonuçlarını üçüncü şahıslara veya kurumlara satmaz, kiralamaz. Yalnızca yasal zorunluluklar çerçevesinde yetkili resmi makamlarla paylaşılabilir.</p>
+
+        <h2>6. Müşteri (Veri Sorumlusu) Yükümlülükleri</h2>
+        <p>Vektia API'sini platformuna entegre eden Müşteri, kendi Gizlilik Politikası ve Çerez/Aydınlatma Metni'nde, kullanıcı (oyuncu) fare/klavye davranış verilerinin "Vektia" gibi 3. parti güvenlik (anti-fraud) servisleriyle paylaşıldığını açıkça beyan etmekle yükümlüdür. Doğrudan kimlik belirleyici verilerin (TCKN, İsim, açık E-posta vb.) Vektia telemetri paketleri içerisinde gönderilmesi yasaktır.</p>
+
+    </div>
+
+    <footer>
+        <div>
+            <a href="terms.html">Hizmet Şartları</a>
+            <a href="privacy.html">Gizlilik Politikası (KVKK)</a>
+        </div>
+        <div style="margin-top: 1rem; font-size: 0.85rem;">&copy; 2026 Vektia. Tüm hakları saklıdır.</div>
+    </footer>
+
+</body>
+</html>
