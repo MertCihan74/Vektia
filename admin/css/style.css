@@ -9,20 +9,20 @@
 /* === CSS Custom Properties (Design Tokens) === */
 :root {
     /* Color Palette */
-    --bg-primary: #06060b;
-    --bg-secondary: #0c0c18;
-    --bg-card: rgba(15, 15, 30, 0.7);
-    --bg-card-hover: rgba(20, 20, 40, 0.85);
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-card: rgba(22, 27, 34, 0.8);
+    --bg-card-hover: rgba(33, 38, 45, 0.9);
     --bg-glass: rgba(255, 255, 255, 0.03);
     --bg-input: rgba(255, 255, 255, 0.05);
     
-    --border-color: rgba(255, 255, 255, 0.06);
+    --border-color: rgba(240, 246, 252, 0.1);
     --border-glow: rgba(0, 212, 255, 0.15);
     
-    --text-primary: #e8e8f0;
-    --text-secondary: #8888a8;
-    --text-muted: #555570;
-    --text-heading: #ffffff;
+    --text-primary: #e6edf3;
+    --text-secondary: #848d97;
+    --text-muted: #6e7681;
+    --text-heading: #f0f6fc;
     
     /* Accent Colors */
     --accent-blue: #00d4ff;
@@ -415,11 +415,13 @@ a:hover {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     transition: all var(--transition-base);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .card:hover {
     border-color: var(--border-glow);
     background: var(--bg-card-hover);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
 }
 
 .card-header {
@@ -677,6 +679,12 @@ a:hover {
 .badge-flagged { background: var(--accent-orange-glow); color: var(--accent-orange); }
 .badge-banned { background: var(--accent-red-glow); color: var(--accent-red); }
 .badge-whitelisted { background: var(--accent-purple-glow); color: var(--accent-purple); }
+
+/* Tier Badges */
+.badge-tier-free { background: rgba(136, 136, 168, 0.15); color: #8888a8; }
+.badge-tier-pro { background: rgba(0, 212, 255, 0.15); color: #00d4ff; }
+.badge-tier-payg { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+.badge-tier-enterprise { background: rgba(255, 217, 61, 0.15); color: #ffd93d; }
 
 /* === Risk Score Bar === */
 .risk-bar-container {

@@ -252,6 +252,9 @@ async def ban_player(
     redis = await get_redis()
     await redis.srem("vektia:flagged:suspicious", player_id)
     await redis.srem("vektia:flagged:confirmed", player_id)
+    # Whitelist'ten de çıkar — yoksa pipeline whitelist kontrolü banlı oyuncuyu
+    # temiz sayıp işaretlemeyi engellerdi (event_buffer.is_whitelisted).
+    await redis.srem("vektia:whitelisted", player_id)
     await redis.sadd("vektia:banned", player_id)
 
     logger.info(f"Oyuncu banlandı: {player_id} (neden: {request.reason}, admin: {auth.get('sub')})")

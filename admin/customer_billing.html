@@ -9,44 +9,8 @@
 <body>
     <div class="app-layout">
         <!-- ═══ SIDEBAR ═══ -->
-        <aside class="sidebar" style="width: 260px;">
-            <div class="sidebar-header">
-                <div class="sidebar-logo">
-                    <div class="logo-icon">V</div>
-                    <span class="logo-text">Vektia</span>
-                    <span class="badge" id="tierBadge" style="margin-left:auto; font-size:0.7rem;"></span>
-                </div>
-            </div>
-            
-            <div style="padding: 1rem; color: var(--primary-color); font-weight: 500; border-bottom: 1px solid var(--border-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="clientNameDisplay">
-                Yükleniyor...
-            </div>
-
-            <nav class="sidebar-nav">
-                <div class="nav-section-label">Stüdyo Menüsü</div>
-                <a href="customer.html" class="nav-item">
-                    <span class="nav-icon">📊</span>
-                    <span data-i18n="menu_dashboard">Dashboard</span>
-                </a>
-                <a href="customer_players.html" class="nav-item">
-                    <span class="nav-icon">👥</span>
-                    <span data-i18n="menu_users">Kullanıcılar</span>
-                </a>
-                <a href="customer_billing.html" class="nav-item active">
-                    <span class="nav-icon">💳</span>
-                    <span data-i18n="menu_billing">Üyelik Bilgilerim</span>
-                </a>
-                <a href="customer_settings.html" class="nav-item">
-                    <span class="nav-icon">⚙️</span>
-                    <span data-i18n="menu_settings">Ayarlar</span>
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <button class="btn btn-ghost" style="width: 100%; text-align: left; display: flex; align-items: center; gap: 0.5rem;" onclick="logoutCustomer()">
-                    🚪 <span data-i18n="menu_logout">Çıkış Yap</span>
-                </button>
-            </div>
+        <aside class="sidebar" id="sidebar-container" style="width: 260px;">
+            <!-- Loaded by layout.js -->
         </aside>
 
         <!-- ═══ MAIN CONTENT ═══ -->
@@ -85,6 +49,14 @@
                                     <div id="billingEndDate" style="font-size: 1rem;">-</div>
                                 </div>
                             </div>
+                            
+                            <div id="paygEventsContainer" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                                <h3 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Anlık Kullanım (Event)</h3>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span id="billingTotalEvents" style="font-size: 1.5rem; font-weight: bold; color: var(--accent-blue);">0</span>
+                                    <span style="font-size: 0.9rem; color: var(--text-secondary);">event</span>
+                                </div>
+                            </div>
 
                             <div style="margin-top: 1rem;" id="billingActions">
                                 <!-- JS ile butonlar gelecek (Premium'a Yükselt veya İptal Et) -->
@@ -98,11 +70,14 @@
     </div>
 
     <script src="js/i18n.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/api.js"></script>
     <script>
         if (!VektiaAPI.getToken()) {
             window.location.href = 'customer_login.html';
         }
+
+        renderCustomerSidebar('billing');
 
         async function init() {
             try {
@@ -110,17 +85,36 @@
                 document.getElementById('clientNameDisplay').textContent = response.client_name || 'Müşteri';
                 
                 const tierBadge = document.getElementById('tierBadge');
-                const isPremium = response.tier === 'premium';
+                const isPremium = response.tier !== 'free'; // Treat payg and enterprise as premium
                 
+                let tierName = 'PRO';
+                let tierClass = 'badge-tier-pro';
+                
+                if (response.tier === 'payg') {
+                    tierName = 'PAY AS YOU GO';
+                    tierClass = 'badge-tier-payg';
+                } else if (response.tier === 'enterprise') {
+                    tierName = 'ENTERPRISE';
+                    tierClass = 'badge-tier-enterprise';
+                } else if (response.tier === 'free') {
+                    tierName = 'FREE TIER';
+                    tierClass = 'badge-tier-free';
+                }
+
                 if (isPremium) {
-                    tierBadge.className = 'badge badge-high';
-                    tierBadge.textContent = 'PREMIUM';
-                    document.getElementById('billingTier').textContent = i18n.t('plan_premium');
+                    tierBadge.className = 'badge ' + tierClass;
+                    tierBadge.textContent = tierName;
+                    document.getElementById('billingTier').textContent = tierName;
                     document.getElementById('billingTier').style.color = 'var(--primary-color)';
+                    
+                    if (response.tier === 'payg') {
+                        document.getElementById('paygEventsContainer').style.display = 'block';
+                        document.getElementById('billingTotalEvents').textContent = response.total_events || 0;
+                    }
                 } else {
-                    tierBadge.className = 'badge badge-low';
-                    tierBadge.textContent = 'FREE TIER';
-                    document.getElementById('billingTier').textContent = i18n.t('plan_free');
+                    tierBadge.className = 'badge ' + tierClass;
+                    tierBadge.textContent = tierName;
+                    document.getElementById('billingTier').textContent = 'Free Trial (3 Gün)';
                     document.getElementById('billingTier').style.color = 'var(--accent-orange)';
                 }
 
@@ -138,8 +132,13 @@
                     statusBadge.className = 'badge badge-danger';
                     statusBadge.textContent = i18n.t('status_past_due');
                 } else {
-                    statusBadge.className = 'badge badge-low';
-                    statusBadge.textContent = i18n.t('status_trial');
+                    if (isPremium) {
+                        statusBadge.className = 'badge ' + tierClass;
+                        statusBadge.textContent = tierName;
+                    } else {
+                        statusBadge.className = 'badge ' + tierClass;
+                        statusBadge.textContent = i18n.t('status_trial');
+                    }
                 }
 
                 // Tarihler

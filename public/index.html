@@ -95,8 +95,8 @@
         .pricing-section { padding: 4rem 5%; text-align: center; }
         .pricing-section h2 { font-size: 2.5rem; margin-bottom: 3rem; }
         .pricing-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem; max-width: 900px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem; max-width: 1300px; margin: 0 auto;
         }
         .price-card {
             background: var(--surface-color); padding: 3rem 2rem; border-radius: var(--radius-lg);
@@ -185,26 +185,50 @@
         <div class="pricing-grid">
             <div class="price-card">
                 <div class="price-tier" data-i18n="price_free">Free Trial</div>
-                <div class="price-amount">$0 <span data-i18n="price_free_period">/7 Gün</span></div>
+                <div class="price-amount">$0 <span data-i18n="price_free_period">/3 Gün</span></div>
                 <ul class="price-features">
-                    <li data-i18n="price_free_desc1">7 Gün tam erişim</li>
+                    <li data-i18n="price_free_desc1">3 Gün tam erişim</li>
                     <li data-i18n="price_free_desc2">Limitsiz tespit (Gizlenmiş User ID)</li>
                     <li data-i18n="price_free_desc3">Sistem doğruluğunu test etme</li>
                     <li data-i18n="price_free_desc4">Topluluk Desteği</li>
                 </ul>
                 <button class="btn btn-outline" style="width: 100%; margin-top: 1rem;" onclick="openRegisterModal('free')" data-i18n="btn_start_free">Ücretsiz Başla</button>
             </div>
-            <div class="price-card premium">
-                <div class="price-tier" data-i18n="price_premium">Premium</div>
-                <div class="price-amount">$99 <span data-i18n="price_prem_period">/Ay</span></div>
+            <div class="price-card">
+                <div class="price-tier" data-i18n="price_payg">Pay As You Go</div>
+                <div class="price-amount" data-i18n="price_payg_amount">$0</div>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;" data-i18n="price_payg_sub">+ $1 / 100K Event</p>
                 <ul class="price-features">
-                    <li data-i18n="price_prem_desc1">Limitsiz API İsteği</li>
-                    <li data-i18n="price_prem_desc2">Gerçek User ID Görünürlüğü</li>
-                    <li data-i18n="price_prem_desc3">Dashboard üzerinden Tek Tıkla Ban</li>
-                    <li data-i18n="price_prem_desc4">Otomatik Webhook Entegrasyonu</li>
-                    <li data-i18n="price_prem_desc5">7/24 Öncelikli Destek</li>
+                    <li data-i18n="price_payg_desc1">Limitsiz Oyuncu (CCU)</li>
+                    <li data-i18n="price_payg_desc2">Standart ML Tespiti</li>
+                    <li data-i18n="price_payg_desc3">Gerçek User ID Görünürlüğü</li>
+                    <li data-i18n="price_payg_desc4">Topluluk Desteği</li>
+                </ul>
+                <button class="btn btn-outline" style="width: 100%; margin-top: 1rem;" onclick="openRegisterModal('payg')" data-i18n="btn_start_free">Ücretsiz Başla</button>
+            </div>
+            <div class="price-card premium">
+                <div class="price-tier" data-i18n="price_premium">Pro</div>
+                <div class="price-amount">$99 <span data-i18n="price_prem_period">/Ay</span></div>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;" data-i18n="price_prem_sub">10M Event Dahil (Aşım: $0.80/100K)</p>
+                <ul class="price-features">
+                    <li data-i18n="price_prem_desc1">Gerçek User ID Görünürlüğü</li>
+                    <li data-i18n="price_prem_desc2">Dashboard üzerinden Tek Tıkla Ban</li>
+                    <li data-i18n="price_prem_desc3">Otomatik Webhook Entegrasyonu</li>
+                    <li data-i18n="price_prem_desc4">7/24 Öncelikli Destek</li>
                 </ul>
                 <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="openRegisterModal('premium')" data-i18n="nav_cta">Hemen Başla</button>
+            </div>
+            <div class="price-card">
+                <div class="price-tier" data-i18n="price_enterprise">Enterprise</div>
+                <div class="price-amount" data-i18n="price_ent_amount">Özel</div>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;" data-i18n="price_ent_sub">Sınırsız Kapasite</p>
+                <ul class="price-features">
+                    <li data-i18n="price_ent_desc1">Dedicated Infrastructure</li>
+                    <li data-i18n="price_ent_desc2">Single-Tenant Veritabanı</li>
+                    <li data-i18n="price_ent_desc3">Özel ML Modeli Eğitimi</li>
+                    <li data-i18n="price_ent_desc4">Özel SLA & Birebir Mühendis Desteği</li>
+                </ul>
+                <button class="btn btn-outline" style="width: 100%; margin-top: 1rem;" onclick="window.location.href='mailto:sales@vektia.com'" data-i18n="btn_contact_sales">Bize Ulaşın</button>
             </div>
         </div>
     </section>
@@ -291,19 +315,35 @@
                 "feat3_desc": "Sadece size özel dashboard üzerinden kullanıcılarınızı anlık takip edin, riskli tespitleri görüp anında yasaklayın.",
                 "pricing_title": "Şeffaf ve Esnek Planlar",
                 "price_free": "Ücretsiz Deneme",
-                "price_free_period": "/7 Gün",
-                "price_free_desc1": "7 Gün tam erişim",
+                "price_free_period": "/3 Gün",
+                "price_free_desc1": "3 Gün tam erişim",
                 "price_free_desc2": "Limitsiz tespit (Gizlenmiş User ID)",
                 "price_free_desc3": "Sistem doğruluğunu test etme",
                 "price_free_desc4": "Topluluk Desteği",
                 "btn_start_free": "Ücretsiz Başla",
-                "price_premium": "Premium",
+                "price_payg": "Pay As You Go",
+                "price_payg_amount": "$0",
+                "price_payg_sub": "+ $1 / 100K Event",
+                "price_payg_desc1": "Limitsiz Oyuncu (CCU)",
+                "price_payg_desc2": "Standart ML Tespiti",
+                "price_payg_desc3": "Gerçek User ID Görünürlüğü",
+                "price_payg_desc4": "Topluluk Desteği",
+                "btn_start_free": "Ücretsiz Başla",
+                "price_premium": "Pro",
                 "price_prem_period": "/Ay",
-                "price_prem_desc1": "Limitsiz API İsteği",
-                "price_prem_desc2": "Gerçek User ID Görünürlüğü",
-                "price_prem_desc3": "Dashboard üzerinden Tek Tıkla Ban",
-                "price_prem_desc4": "Otomatik Webhook Entegrasyonu",
-                "price_prem_desc5": "7/24 Öncelikli Destek",
+                "price_prem_sub": "10M Event Dahil (Aşım: $0.80/100K)",
+                "price_prem_desc1": "Gerçek User ID Görünürlüğü",
+                "price_prem_desc2": "Dashboard üzerinden Tek Tıkla Ban",
+                "price_prem_desc3": "Otomatik Webhook Entegrasyonu",
+                "price_prem_desc4": "7/24 Öncelikli Destek",
+                "price_enterprise": "Enterprise",
+                "price_ent_amount": "Özel",
+                "price_ent_sub": "Sınırsız Kapasite",
+                "price_ent_desc1": "Dedicated (Özel) Altyapı",
+                "price_ent_desc2": "Single-Tenant Veritabanı",
+                "price_ent_desc3": "Özel ML Modeli Eğitimi",
+                "price_ent_desc4": "Özel SLA & Birebir Mühendis Desteği",
+                "btn_contact_sales": "Bize Ulaşın",
                 "modal_reg_title": "Sisteme Kayıt Ol",
                 "modal_reg_sub": "Stüdyo adınızı ve kurumsal e-postanızı girin.",
                 "lbl_studio_name": "Stüdyo / Platform Adı",
@@ -335,19 +375,35 @@
                 "feat3_desc": "Monitor your users instantly via a dedicated dashboard, view risky detections, and ban immediately.",
                 "pricing_title": "Transparent and Flexible Plans",
                 "price_free": "Free Trial",
-                "price_free_period": "/7 Days",
-                "price_free_desc1": "7 Days full access",
+                "price_free_period": "/3 Days",
+                "price_free_desc1": "3 Days full access",
                 "price_free_desc2": "Unlimited detection (Hidden User ID)",
                 "price_free_desc3": "System accuracy testing",
                 "price_free_desc4": "Community Support",
                 "btn_start_free": "Start for Free",
-                "price_premium": "Premium",
+                "price_payg": "Pay As You Go",
+                "price_payg_amount": "$0",
+                "price_payg_sub": "+ $1 / 100K Events",
+                "price_payg_desc1": "Unlimited Players (CCU)",
+                "price_payg_desc2": "Standard ML Detection",
+                "price_payg_desc3": "Real User ID Visibility",
+                "price_payg_desc4": "Community Support",
+                "btn_start_free": "Start for Free",
+                "price_premium": "Pro",
                 "price_prem_period": "/Month",
-                "price_prem_desc1": "Unlimited API Requests",
-                "price_prem_desc2": "Real User ID Visibility",
-                "price_prem_desc3": "One-Click Ban via Dashboard",
-                "price_prem_desc4": "Auto Webhook Integration",
-                "price_prem_desc5": "24/7 Priority Support",
+                "price_prem_sub": "10M Events Included (Overage: $0.80/100K)",
+                "price_prem_desc1": "Real User ID Visibility",
+                "price_prem_desc2": "One-Click Ban via Dashboard",
+                "price_prem_desc3": "Auto Webhook Integration",
+                "price_prem_desc4": "24/7 Priority Support",
+                "price_enterprise": "Enterprise",
+                "price_ent_amount": "Custom",
+                "price_ent_sub": "Unlimited Capacity",
+                "price_ent_desc1": "Dedicated Infrastructure",
+                "price_ent_desc2": "Single-Tenant Database",
+                "price_ent_desc3": "Custom ML Model Training",
+                "price_ent_desc4": "Custom SLA & 1-on-1 Engineering Support",
+                "btn_contact_sales": "Contact Sales",
                 "modal_reg_title": "System Registration",
                 "modal_reg_sub": "Enter your studio name and corporate email.",
                 "lbl_studio_name": "Studio / Platform Name",

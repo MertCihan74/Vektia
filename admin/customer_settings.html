@@ -97,44 +97,8 @@
 <body>
     <div class="app-layout">
         <!-- ═══ SIDEBAR ═══ -->
-        <aside class="sidebar" style="width: 260px;">
-            <div class="sidebar-header">
-                <div class="sidebar-logo">
-                    <div class="logo-icon">V</div>
-                    <span class="logo-text">Vektia</span>
-                    <span class="badge" id="tierBadge" style="margin-left:auto; font-size:0.7rem;"></span>
-                </div>
-            </div>
-            
-            <div style="padding: 1rem; color: var(--primary-color); font-weight: 500; border-bottom: 1px solid var(--border-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="clientNameDisplay">
-                Yükleniyor...
-            </div>
-
-            <nav class="sidebar-nav">
-                <div class="nav-section-label">Stüdyo Menüsü</div>
-                <a href="customer.html" class="nav-item">
-                    <span class="nav-icon">📊</span>
-                    <span data-i18n="menu_dashboard">Dashboard</span>
-                </a>
-                <a href="customer_players.html" class="nav-item">
-                    <span class="nav-icon">👥</span>
-                    <span data-i18n="menu_users">Kullanıcılar</span>
-                </a>
-                <a href="customer_billing.html" class="nav-item">
-                    <span class="nav-icon">💳</span>
-                    <span data-i18n="menu_billing">Üyelik Bilgilerim</span>
-                </a>
-                <a href="customer_settings.html" class="nav-item active">
-                    <span class="nav-icon">⚙️</span>
-                    <span data-i18n="menu_settings">Ayarlar</span>
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <button class="btn btn-ghost" style="width: 100%; text-align: left; display: flex; align-items: center; gap: 0.5rem;" onclick="logoutCustomer()">
-                    🚪 <span data-i18n="menu_logout">Çıkış Yap</span>
-                </button>
-            </div>
+        <aside class="sidebar" id="sidebar-container" style="width: 260px;">
+            <!-- Loaded by layout.js -->
         </aside>
 
         <!-- ═══ MAIN CONTENT ═══ -->
@@ -199,27 +163,41 @@
     </div>
 
     <script src="js/i18n.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/api.js"></script>
     <script>
         if (!VektiaAPI.getToken()) {
             window.location.href = 'customer_login.html';
         }
 
+        renderCustomerSidebar('settings');
+
         async function initSettings() {
             try {
                 const info = await VektiaAPI.request('/api/v1/customer/dashboard');
                 document.getElementById('clientNameDisplay').textContent = info.client_name || 'Bilinmiyor';
-                document.getElementById('tierBadge').textContent = info.tier.toUpperCase();
+                let tierName = 'PRO';
+                let tierClass = 'badge-tier-pro';
                 
-                if (info.tier === 'premium') {
-                    document.getElementById('tierBadge').className = 'badge warning';
-                } else {
-                    document.getElementById('tierBadge').className = 'badge';
+                if (info.tier === 'payg') {
+                    tierName = 'PAY AS YOU GO';
+                    tierClass = 'badge-tier-payg';
+                } else if (info.tier === 'enterprise') {
+                    tierName = 'ENTERPRISE';
+                    tierClass = 'badge-tier-enterprise';
+                } else if (info.tier === 'free') {
+                    tierName = 'FREE TIER';
+                    tierClass = 'badge-tier-free';
                 }
+                
+                document.getElementById('tierBadge').textContent = tierName;
+                document.getElementById('tierBadge').className = 'badge ' + tierClass;
+                
+                const isPremium = info.tier !== 'free';
 
                 document.getElementById('settingsContainer').style.display = 'block';
 
-                if (info.tier !== 'premium') {
+                if (!isPremium) {
                     document.getElementById('premiumOnlyWarning').style.display = 'block';
                     document.getElementById('autoBanToggle').disabled = true;
                     document.getElementById('autoBanHighRisk').disabled = true;

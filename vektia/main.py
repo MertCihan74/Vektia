@@ -17,6 +17,7 @@ from fastapi.responses import FileResponse
 from vektia.config import get_settings
 from vektia.db.redis_client import init_redis, close_redis
 from vektia.db.database import init_database, close_database
+from vektia.db import event_buffer
 from vektia.api.middleware import RequestLoggingMiddleware
 from vektia.api.routes import health, telemetry, admin, webhook, customer
 from vektia.api.websocket import router as ws_router
@@ -46,14 +47,20 @@ async def lifespan(app: FastAPI):
     await init_database()
     logger.info("✅ Veritabanı hazır")
 
+    # Whitelist'i DB'den Redis set'ine senkronla (restart dayanıklılığı — ölçeklenme)
+    await event_buffer.sync_whitelist_from_db()
+
     # ML Worker arka plan görevi
     ml_task = asyncio.create_task(_ml_worker_background())
-    
+
     # Alert Worker arka plan görevi
     alert_task = asyncio.create_task(_alert_worker_background())
-    
+
     # Subscription Worker arka plan görevi
     sub_task = asyncio.create_task(_subscription_worker_background())
+
+    # Olay sayacı flush worker (Redis → Postgres toplu yazım — ölçeklenme)
+    flush_task = asyncio.create_task(_event_flush_background())
 
     logger.info(f"✅ {settings.app_name} hazır — http://{settings.host}:{settings.port}")
     logger.info(f"📊 Admin Panel — http://{settings.host}:{settings.port}/admin/")
@@ -65,6 +72,12 @@ async def lifespan(app: FastAPI):
     ml_task.cancel()
     alert_task.cancel()
     sub_task.cancel()
+    flush_task.cancel()
+    # Kapanmadan önce biriken son sayaçları DB'ye yaz (kayıp olmasın)
+    try:
+        await event_buffer.flush_pending_events()
+    except Exception as e:
+        logger.error(f"Kapanış flush hatası: {e}")
     await close_redis()
     await close_database()
     logger.info("👋 Kapatma tamamlandı")
@@ -106,6 +119,21 @@ async def _alert_worker_background():
         except Exception as e:
             logger.error(f"Alert worker hatası: {e}")
         await asyncio.sleep(5)  # 5 saniyede bir kontrol et
+
+
+async def _event_flush_background():
+    """
+    Olay sayacı flush worker'ı (ölçeklenme): Redis'te biriken olay sayaçlarını
+    periyodik olarak TOPLU şekilde Postgres'e yazar. Hot-path'i Postgres'siz tutar.
+    """
+    while True:
+        try:
+            await event_buffer.flush_pending_events()
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            logger.error(f"Event flush worker hatası: {e}")
+        await asyncio.sleep(5)  # 5 saniyede bir flush
 
 
 # ============================================

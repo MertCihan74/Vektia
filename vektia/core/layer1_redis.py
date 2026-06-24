@@ -9,7 +9,7 @@ Eski veriler Redis Lua scripti ile atomik olarak silinir.
 """
 
 from vektia.db.redis_client import get_redis, execute_lua
-from vektia.core.models import TelemetryEvent, WindowData, ActionType
+from vektia.core.models import TelemetryEvent, WindowData, ActionType, Vector3
 from vektia.config import get_settings
 from vektia.utils.logger import get_logger
 
@@ -46,18 +46,31 @@ class SlidingWindowFilter:
         key = self._get_key(event.client_id, event.player_id, event.action_type)
 
         try:
+            # Veri formatı: "timestamp|x|y" veya "timestamp"
+            data_str = str(event.timestamp)
+            if event.coords:
+                data_str = f"{event.timestamp}|{event.coords.x}|{event.coords.y}"
+
             # Lua scripti ile atomik sliding window işlemi
-            timestamps_raw = await execute_lua(
+            raw_data_list = await execute_lua(
                 "sliding_window",
                 keys=[key],
                 args=[
-                    str(event.timestamp),
+                    data_str,
                     str(settings.max_window),
                     str(settings.player_ttl_seconds),
                 ],
             )
 
-            timestamps = [float(t) for t in timestamps_raw]
+            timestamps = []
+            coords_list = []
+            for item in raw_data_list:
+                parts = item.split("|")
+                timestamps.append(float(parts[0]))
+                if len(parts) >= 3:
+                    coords_list.append(Vector3(x=float(parts[1]), y=float(parts[2]), z=0.0))
+                else:
+                    coords_list.append(None)
 
             return WindowData(
                 client_id=event.client_id,
@@ -66,6 +79,7 @@ class SlidingWindowFilter:
                 action_type=event.action_type,
                 has_enough_data=len(timestamps) >= settings.max_window,
                 window_size=len(timestamps),
+                coords_list=coords_list,
             )
 
         except ValueError:
@@ -79,15 +93,27 @@ class SlidingWindowFilter:
         redis = await get_redis()
         key = self._get_key(event.client_id, event.player_id, event.action_type)
 
+        data_str = str(event.timestamp)
+        if event.coords:
+            data_str = f"{event.timestamp}|{event.coords.x}|{event.coords.y}"
+
         pipe = redis.pipeline(transaction=True)
-        pipe.lpush(key, str(event.timestamp))
+        pipe.lpush(key, data_str)
         pipe.ltrim(key, 0, settings.max_window - 1)
         pipe.expire(key, settings.player_ttl_seconds)
         pipe.lrange(key, 0, -1)
         results = await pipe.execute()
 
-        timestamps_raw = results[3]  # lrange sonucu
-        timestamps = [float(t) for t in timestamps_raw]
+        raw_data_list = results[3]  # lrange sonucu
+        timestamps = []
+        coords_list = []
+        for item in raw_data_list:
+            parts = item.split("|")
+            timestamps.append(float(parts[0]))
+            if len(parts) >= 3:
+                coords_list.append(Vector3(x=float(parts[1]), y=float(parts[2]), z=0.0))
+            else:
+                coords_list.append(None)
 
         return WindowData(
             client_id=event.client_id,
@@ -96,6 +122,7 @@ class SlidingWindowFilter:
             action_type=event.action_type,
             has_enough_data=len(timestamps) >= settings.max_window,
             window_size=len(timestamps),
+            coords_list=coords_list,
         )
 
     async def get_player_window(

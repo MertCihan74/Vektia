@@ -28,7 +28,7 @@ MODEL_PATH = MODEL_DIR / "isolation_forest.joblib"
 class MLAnomalyDetector:
     """
     Katman 3: Isolation Forest Anomali Tespiti.
-    
+
     Katman 2'nin istatistiksel metriklerini feature vektörü olarak alır
     ve çok boyutlu uzayda anomali skoru üretir.
     """
@@ -66,7 +66,7 @@ class MLAnomalyDetector:
     def train(self, clean_data: list[StatsResult]) -> None:
         """
         Modeli "temiz" oyuncu verileriyle eğitir.
-        
+
         Args:
             clean_data: Katman 2'den geçen temiz oyuncuların StatsResult listesi
         """
@@ -88,10 +88,10 @@ class MLAnomalyDetector:
     def predict(self, stats_result: StatsResult) -> tuple[float, RiskLevel]:
         """
         Tek bir oyuncunun anomali skorunu hesaplar.
-        
+
         Args:
             stats_result: Katman 2'nin ürettiği istatistiksel sonuç
-            
+
         Returns:
             (anomaly_score, risk_level) tuple'ı
             anomaly_score: 0.0 (normal) - 1.0 (kesin anomali)
@@ -106,18 +106,34 @@ class MLAnomalyDetector:
         # Isolation Forest: -1 = anomali, 1 = normal
         prediction = self.model.predict(features)[0]
 
-        # Anomali skoru (düşük = anomali, yüksek = normal)
-        raw_score = self.model.score_samples(features)[0]
+        # Anomali skorunu (0=normal .. 1=anomali) MODELİN KENDİ karar sınırına
+        # göre ölçekle. ÖNEMLİ DÜZELTME: Eskiden `-score_samples * 2` kullanılıyordu;
+        # ama IsolationForest'ın score_samples'ı NORMAL noktalar için bile ~-0.45
+        # civarındadır → normal insan da anomaly_score≈0.9 alıp yanlış flag yiyordu
+        # (insan-FP'nin ana ML kaynağı). decision_function ise kontaminasyonla
+        # kalibre edilmiş sınırı 0'a taşır: >0 normal, <0 anomali. Sınır etrafında
+        # ölçekliyoruz. Eğim (ANOMALY_SLOPE) Faz 4'te gölge-mod ölçümüyle kalibre edilmeli.
+        decision = float(self.model.decision_function(features)[0])  # >0 normal, <0 anomali
+        raw_score = float(self.model.score_samples(features)[0])     # yalnızca loglama için
+        ANOMALY_SLOPE = 5.0
+        anomaly_score = float(np.clip(0.5 - ANOMALY_SLOPE * decision, 0.0, 1.0))
 
-        # Skoru 0-1 aralığına normalize et (düşük raw = yüksek anomali)
-        # Tipik raw score aralığı: -0.5 (anomali) — 0.0 (normal)
-        anomaly_score = max(0.0, min(1.0, -raw_score * 2))
-
-        # Katman 2 skoru ile ML skorunu birleştir (ağırlıklı)
+        # Katman 2 ve ML skorlarını birleştir (ağırlıklı).
+        #
+        # ÖNEMLİ (Faz 2 — Yanlış Pozitif Azaltma): Eskiden risk_score == 1.0
+        # olduğunda ML tamamen by-pass edilip anında CONFIRMED veriliyordu.
+        # Bu, Katman 2'nin kırılgan tek-pencere "hard" kurallarını temyiz
+        # edilemez kılıyordu. Artık ML HER ZAMAN katkıda bulunur: model açıkça
+        # "normal" diyorsa (prediction == 1 ve düşük anomali), heuristik 1.0
+        # olsa bile gerçek oyuncu CONFIRMED yapılmaz; yalnızca HIGH (admin
+        # incelemesi) olarak işaretlenir. Böylece ML bir güvenlik ağı görevi görür.
         combined_score = 0.6 * anomaly_score + 0.4 * stats_result.risk_score
 
-        # Risk seviyesi belirleme
-        if combined_score >= 0.85 or prediction == -1:
+        # CONFIRMED yalnızca İKİ kanıt birden güçlüyse: model anomali diyor
+        # (prediction == -1) VE birleşik skor yeterince yüksek.
+        if prediction == -1 and combined_score >= 0.6:
+            risk_level = RiskLevel.CONFIRMED
+        elif combined_score >= 0.85:
             risk_level = RiskLevel.CONFIRMED
         elif combined_score >= 0.6:
             risk_level = RiskLevel.HIGH
@@ -139,10 +155,10 @@ class MLAnomalyDetector:
     ) -> list[tuple[str, float, RiskLevel]]:
         """
         Toplu anomali tespiti.
-        
+
         Args:
             stats_results: StatsResult listesi
-            
+
         Returns:
             (player_id, anomaly_score, risk_level) listesi
         """

@@ -21,6 +21,7 @@ from vektia.db.database import (
     VerificationOTP,
 )
 from vektia.utils.security import verify_password, hash_password
+from vektia.core.metrics import false_positive_rate as _fp_rate
 from vektia.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -396,7 +397,7 @@ async def get_player_detail(client_id: int, player_id: str) -> PlayerRecord | No
 
 
 async def increment_player_events(client_id: int, player_id: str) -> None:
-    """Oyuncunun toplam olay sayısını artırır."""
+    """Oyuncunun toplam olay sayısını artırır (tekil)."""
     async with get_session() as session:
         await session.execute(
             update(PlayerRecord)
@@ -412,6 +413,37 @@ async def increment_player_events(client_id: int, player_id: str) -> None:
         await session.commit()
 
 
+async def add_player_events(client_id: int, player_id: str, count: int) -> None:
+    """
+    Oyuncunun toplam olay sayısını TOPLU artırır (event_buffer flush'ı için).
+    Her olayda DB'ye yazmak yerine Redis'te biriken sayaç periyodik olarak buradan uygulanır.
+    """
+    if count <= 0:
+        return
+    async with get_session() as session:
+        await session.execute(
+            update(PlayerRecord)
+            .where(
+                PlayerRecord.client_id == client_id,
+                PlayerRecord.player_id == player_id
+            )
+            .values(
+                total_events=PlayerRecord.total_events + count,
+                last_seen=datetime.now(timezone.utc),
+            )
+        )
+        await session.commit()
+
+
+async def get_whitelisted_player_ids() -> list[str]:
+    """Whitelisted oyuncuların player_id'leri (başlangıçta Redis set'ine yüklemek için)."""
+    async with get_session() as session:
+        result = await session.execute(
+            select(PlayerRecord.player_id).where(PlayerRecord.status == "whitelisted")
+        )
+        return [row[0] for row in result.all()]
+
+
 # ============================================
 # Dashboard Statistics
 # ============================================
@@ -423,23 +455,42 @@ async def get_dashboard_stats(client_id: int | None = None) -> dict:
         q_active = select(func.count(PlayerRecord.player_id.distinct())).where(PlayerRecord.status == "active")
         q_flagged = select(func.count(PlayerRecord.player_id.distinct())).where(PlayerRecord.status == "flagged")
         q_banned = select(func.count(PlayerRecord.player_id.distinct())).where(PlayerRecord.status == "banned")
+        q_whitelisted = select(func.count(PlayerRecord.player_id.distinct())).where(PlayerRecord.status == "whitelisted")
+
+        q_events = select(func.sum(PlayerRecord.total_events))
 
         if client_id is not None:
             q_total = q_total.where(PlayerRecord.client_id == client_id)
             q_active = q_active.where(PlayerRecord.client_id == client_id)
             q_flagged = q_flagged.where(PlayerRecord.client_id == client_id)
             q_banned = q_banned.where(PlayerRecord.client_id == client_id)
+            q_whitelisted = q_whitelisted.where(PlayerRecord.client_id == client_id)
+            q_events = q_events.where(PlayerRecord.client_id == client_id)
 
         total = await session.execute(q_total)
         active = await session.execute(q_active)
         flagged = await session.execute(q_flagged)
         banned = await session.execute(q_banned)
+        whitelisted = await session.execute(q_whitelisted)
+        events = await session.execute(q_events)
+
+        flagged_n = flagged.scalar() or 0
+        banned_n = banned.scalar() or 0
+        whitelisted_n = whitelisted.scalar() or 0
+
+        # Faz 4 — Yanlış-pozitif oranı telemetrisi (saf hesaplama metrics.py'de).
+        # Admin bir oyuncuyu whitelist'e aldıysa, sistemin işaretlemesi yanlıştı
+        # (false positive) demektir.
+        false_positive_rate = _fp_rate(flagged_n, banned_n, whitelisted_n)
 
         return {
             "total_players": total.scalar() or 0,
             "active_players": active.scalar() or 0,
-            "flagged_players": flagged.scalar() or 0,
-            "banned_players": banned.scalar() or 0,
+            "flagged_players": flagged_n,
+            "banned_players": banned_n,
+            "whitelisted_players": whitelisted_n,
+            "total_events": events.scalar() or 0,
+            "false_positive_rate": false_positive_rate,
         }
 
 

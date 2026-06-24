@@ -93,6 +93,7 @@ class WindowData(BaseModel):
     action_type: ActionType
     has_enough_data: bool = False
     window_size: int = 0
+    coords_list: list[Vector3 | None] | None = None
 
 
 class StatsResult(BaseModel):
@@ -105,6 +106,8 @@ class StatsResult(BaseModel):
     autocorrelation: float = 0.0
     mean_delta: float = 0.0
     median_delta: float = 0.0
+    skewness: float = 0.0
+    range_ratio: float = 0.0
     risk_level: RiskLevel = RiskLevel.CLEAN
     risk_score: float = Field(default=0.0, ge=0.0, le=1.0)
 
@@ -118,6 +121,8 @@ class StatsResult(BaseModel):
             self.autocorrelation,
             self.mean_delta,
             self.median_delta,
+            self.skewness,
+            self.range_ratio,
         ]
 
 

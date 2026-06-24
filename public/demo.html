@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mert Şirketi - Vektia ML Demo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+        
+        :root {
+            --bg: #09090b;
+            --surface: rgba(24, 24, 27, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #10b981; /* Emerald for clean */
+            --danger: #ef4444; /* Red for bot */
+            --text: #f8fafc;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(239, 68, 68, 0.05) 0%, transparent 50%);
+        }
+
+        .glass {
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 350px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            z-index: 10;
+        }
+
+        .brand h1 {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand p {
+            color: #94a3b8;
+            font-size: 14px;
+            margin: 4px 0 0 0;
+        }
+
+        /* Status Card */
+        .status-card {
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .status-card h2 {
+            margin: 0;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #94a3b8;
+        }
+
+        .status-badge {
+            font-size: 32px;
+            font-weight: 800;
+            margin-top: 12px;
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+            color: var(--primary);
+        }
+
+        .status-card.flagged {
+            border-color: var(--danger);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
+        }
+
+        .status-card.flagged .status-badge {
+            color: var(--danger);
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+
+        /* Controls */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        button {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+        }
+        
+        button:disabled {
+            background: #334155;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Log Feed */
+        .logs {
+            flex-grow: 1;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .log-entry {
+            color: #94a3b8;
+        }
+        .log-entry.event { color: #38bdf8; }
+        .log-entry.alert { color: #ef4444; font-weight: bold; }
+
+        /* Game Area */
+        .game-container {
+            flex-grow: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #1e293b, #0f172a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .player {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 30px var(--primary);
+            transition: left 0.1s linear, top 0.1s linear, background-color 0.3s, box-shadow 0.3s;
+            z-index: 2;
+        }
+
+        .player.flagged {
+            background: var(--danger);
+            box-shadow: 0 0 30px var(--danger);
+        }
+
+        .bullet {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #fde047;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #fde047;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .crosshair-ui {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            transition: transform 0.1s;
+        }
+
+        .crosshair-ui::before, .crosshair-ui::after {
+            content: '';
+            position: absolute;
+            background: rgba(255,255,255,0.5);
+        }
+        .crosshair-ui::before { top: 50%; left: -5px; right: -5px; height: 2px; transform: translateY(-50%); }
+        .crosshair-ui::after { left: 50%; top: -5px; bottom: -5px; width: 2px; transform: translateX(-50%); }
+
+        .instructions {
+            position: absolute;
+            bottom: 30px;
+            text-align: center;
+            color: rgba(255,255,255,0.3);
+            pointer-events: none;
+            font-size: 14px;
+        }
+        .instructions kbd {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glass sidebar">
+        <div class="brand">
+            <h1>Mert Şirketi 🛡️</h1>
+            <p>Vektia Canlı Telemetri Test Paneli</p>
+        </div>
+
+        <div class="glass status-card" id="statusCard">
+            <h2>ML Analiz Durumu</h2>
+            <div class="status-badge" id="statusText">BEKLENİYOR</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;" id="scoreText">Henüz veri yok</div>
+        </div>
+
+        <div class="control-group">
+            <label for="playerId">Oyuncu ID</label>
+            <input type="text" id="playerId" value="mert_live_01">
+        </div>
+
+        <button id="connectBtn">Sunucuya Bağlan</button>
+
+        <label>Canlı Olay Akışı</label>
+        <div class="logs" id="logs">
+            <div class="log-entry">Sistem hazır. Bağlantı bekleniyor...</div>
+        </div>
+    </div>
+
+    <div class="game-container" id="gameArea">
+        <div class="crosshair-ui" id="crosshair"></div>
+        <div class="player" id="player"></div>
+        <div class="instructions">
+            Hareket: <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> &nbsp;|&nbsp; Ateş: <kbd>SOL TIK</kbd><br><br>
+            <i>Eğer makro deneyeceksen bu sekmeye makro atayabilirsin!</i>
+        </div>
+    </div>
+
+    <script>
+        // MERT ŞİRKETİ (Client ID: 1) API KEY
+        const API_KEY = "test_api_key_A"; 
+        
+        let ws = null;
+        let isConnected = false;
+        
+        // UI Elements
+        const connectBtn = document.getElementById('connectBtn');
+        const logsDiv = document.getElementById('logs');
+        const statusCard = document.getElementById('statusCard');
+        const statusText = document.getElementById('statusText');
+        const scoreText = document.getElementById('scoreText');
+        const playerEl = document.getElementById('player');
+        const gameArea = document.getElementById('gameArea');
+        const crosshair = document.getElementById('crosshair');
+        
+        // Game State
+        let pX = gameArea.clientWidth / 2;
+        let pY = gameArea.clientHeight / 2;
+        let keys = {};
+        let mouseX = pX;
+        let mouseY = pY;
+
+        function addLog(msg, type = '') {
+            const el = document.createElement('div');
+            el.className = `log-entry ${type}`;
+            const time = new Date().toLocaleTimeString();
+            el.textContent = `[${time}] ${msg}`;
+            logsDiv.appendChild(el);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        function connect() {
+            if (ws && isConnected) {
+                ws.close();
+                return;
+            }
+
+            const playerId = document.getElementById('playerId').value;
+            if (!playerId) {
+                alert("Lütfen Oyuncu ID girin!");
+                return;
+            }
+
+            addLog("WebSocket bağlanıyor...");
+            connectBtn.disabled = true;
+
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host || 'localhost:8000';
+            ws = new WebSocket(`${protocol}//${host}/api/v1/telemetry/stream`);
+
+            ws.onopen = () => {
+                // Auth message
+                ws.send(JSON.stringify({
+                    auth: API_KEY,
+                    server_id: "demo_server"
+                }));
+            };
+
+            ws.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                
+                if (data.status === "authenticated") {
+                    isConnected = true;
+                    connectBtn.textContent = "Bağlantıyı Kes";
+                    connectBtn.disabled = false;
+                    addLog("Bağlantı başarılı. Veri gönderimine hazır.", "event");
+                    statusText.textContent = "TEMİZ (HUMAN)";
+                    statusText.style.color = "var(--primary)";
+                    statusCard.classList.remove('flagged');
+                    playerEl.classList.remove('flagged');
+                }
+                else if (data.type === "alert") {
+                    addLog(`BOT TESPİTİ! Risk: ${data.risk_level} (${data.risk_score.toFixed(2)})`, "alert");
+                    statusText.textContent = "BOT TESPİT EDİLDİ";
+                    statusCard.classList.add('flagged');
+                    playerEl.classList.add('flagged');
+                    scoreText.textContent = `Risk Skoru: ${data.risk_score.toFixed(2)} (Seviye: ${data.risk_level.toUpperCase()})`;
+                }
+                else if (data.error) {
+                    addLog(`Hata: ${data.error}`, "alert");
+                    connectBtn.disabled = false;
+                }
+            };
+
+            ws.onclose = () => {
+                isConnected = false;
+                connectBtn.textContent = "Sunucuya Bağlan";
+                connectBtn.disabled = false;
+                addLog("Bağlantı kesildi.");
+            };
+            
+            ws.onerror = (e) => {
+                addLog("WebSocket Hatası! Sunucu açık mı?", "alert");
+                connectBtn.disabled = false;
+            };
+        }
+
+        function sendEvent(actionType, extraCoords = null) {
+            if (!isConnected || !ws) return;
+            const playerId = document.getElementById('playerId').value;
+            
+            const eventPayload = {
+                player_id: playerId,
+                action_type: actionType,
+                timestamp: Date.now()
+            };
+            
+            if (extraCoords) {
+                eventPayload.coords = { x: extraCoords.x, y: extraCoords.y, z: 0.0 };
+            }
+            
+            ws.send(JSON.stringify(eventPayload));
+            addLog(`Gönderildi: ${actionType}`, "event");
+        }
+
+        connectBtn.addEventListener('click', connect);
+
+        // --- Game Logic ---
+        
+        // Key Listeners
+        let lastMoveEvent = 0;
+        window.addEventListener('keydown', e => {
+            const key = e.key.toLowerCase();
+            keys[key] = true;
+            if (['w', 'a', 's', 'd'].includes(key)) {
+                const now = Date.now();
+                if (now - lastMoveEvent > 30) {
+                    sendEvent("move"); // Simulates OS auto-repeat for walking
+                    lastMoveEvent = now;
+                }
+            }
+        });
+        window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+        
+        // Mouse Listeners
+        gameArea.addEventListener('mousemove', e => {
+            const rect = gameArea.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+            crosshair.style.left = mouseX + 'px';
+            crosshair.style.top = mouseY + 'px';
+        });
+
+        gameArea.addEventListener('mousedown', e => {
+            if (e.button === 0) { // Left click
+                shoot();
+                sendEvent("click", { x: mouseX, y: mouseY });
+            }
+        });
+
+        function shoot() {
+            crosshair.style.transform = 'translate(-50%, -50%) scale(1.5)';
+            setTimeout(() => crosshair.style.transform = 'translate(-50%, -50%) scale(1)', 100);
+
+            // Visual bullet effect
+            const bullet = document.createElement('div');
+            bullet.className = 'bullet';
+            bullet.style.left = pX + 'px';
+            bullet.style.top = pY + 'px';
+            gameArea.appendChild(bullet);
+
+            // Animate bullet to mouse target
+            const dx = mouseX - pX;
+            const dy = mouseY - pY;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            bullet.style.transition = `all ${dist * 2}ms linear`;
+            
+            // Trigger reflow
+            bullet.getBoundingClientRect();
+            
+            bullet.style.left = mouseX + 'px';
+            bullet.style.top = mouseY + 'px';
+            
+            setTimeout(() => {
+                bullet.remove();
+            }, dist * 2);
+        }
+
+        // Game Loop
+        const speed = 4;
+        function update() {
+            let moved = false;
+            if (keys['w']) { pY -= speed; moved = true; }
+            if (keys['s']) { pY += speed; moved = true; }
+            if (keys['a']) { pX -= speed; moved = true; }
+            if (keys['d']) { pX += speed; moved = true; }
+
+            // Boundaries
+            pX = Math.max(16, Math.min(gameArea.clientWidth - 16, pX));
+            pY = Math.max(16, Math.min(gameArea.clientHeight - 16, pY));
+
+            playerEl.style.left = pX + 'px';
+            playerEl.style.top = pY + 'px';
+
+            requestAnimationFrame(update);
+        }
+        
+        update();
+
+    </script>
+</body>
+</html>

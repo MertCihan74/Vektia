@@ -190,7 +190,7 @@ async def _create_default_admin() -> None:
 
 
 async def _create_test_clients() -> None:
-    """Test için 2 adet varsayılan müşteri oluşturur."""
+    """Test için 4 adet varsayılan müşteri oluşturur."""
     async with get_session() as session:
         from sqlalchemy import select
         
@@ -200,9 +200,11 @@ async def _create_test_clients() -> None:
         if not clients:
             client_a = Client(name="Studio A (Premium)", api_key="test_api_key_A", tier="premium")
             client_b = Client(name="Studio B (Free-Tier)", api_key="test_api_key_B", tier="free")
-            session.add_all([client_a, client_b])
+            client_c = Client(name="Studio C (Pay As You Go)", api_key="test_api_key_payg", tier="payg")
+            client_d = Client(name="Studio D (Enterprise)", api_key="test_api_key_enterprise", tier="enterprise")
+            session.add_all([client_a, client_b, client_c, client_d])
             await session.commit()
-            logger.info("Test müşterileri oluşturuldu: test_api_key_A (premium), test_api_key_B (free)")
+            logger.info("Test müşterileri oluşturuldu: test_api_key_A (premium), test_api_key_B (free), test_api_key_payg (payg), test_api_key_enterprise (enterprise)")
 
 
 def get_session() -> AsyncSession:

@@ -10,42 +10,8 @@
 <body>
     <div class="app-layout">
         <!-- ═══ SIDEBAR ═══ -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-logo">
-                    <div class="logo-icon">V</div>
-                    <span class="logo-text">Vektia</span>
-                    <span class="logo-badge">v0.1</span>
-                </div>
-            </div>
-
-            <nav class="sidebar-nav">
-                <div class="nav-section-label">Ana Menü</div>
-                <a href="index.html" class="nav-item" data-page="dashboard">
-                    <span class="nav-icon">📊</span>
-                    Dashboard
-                </a>
-                <a href="clients.html" class="nav-item active" data-page="clients">
-                    <span class="nav-icon">🏢</span>
-                    Müşteriler
-                </a>
-                <div class="nav-section-label">Sistem</div>
-                <a href="settings.html" class="nav-item" data-page="settings">
-                    <span class="nav-icon">⚙️</span>
-                    Ayarlar
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <div class="user-avatar">A</div>
-                    <div class="user-details">
-                        <div class="user-name" id="adminName">Admin</div>
-                        <div class="user-role">Yönetici</div>
-                    </div>
-                    <button class="btn btn-ghost btn-sm" onclick="VektiaAPI.logout()" title="Çıkış Yap">🚪</button>
-                </div>
-            </div>
+        <aside class="sidebar" id="sidebar-container">
+            <!-- Loaded by layout.js -->
         </aside>
 
         <!-- ═══ MAIN CONTENT ═══ -->
@@ -140,9 +106,12 @@
     </div>
 
     <!-- Scripts -->
+    <script src="js/layout.js"></script>
     <script src="js/api.js"></script>
     <script>
         if (!requireAuth()) throw new Error('Auth required');
+        renderAdminSidebar('clients');
+        loadAdminInfo();
 
         async function loadClients() {
             const tbody = document.getElementById('clientsTableBody');

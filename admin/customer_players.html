@@ -9,44 +9,8 @@
 <body>
     <div class="app-layout">
         <!-- ═══ SIDEBAR ═══ -->
-        <aside class="sidebar" style="width: 260px;">
-            <div class="sidebar-header">
-                <div class="sidebar-logo">
-                    <div class="logo-icon">V</div>
-                    <span class="logo-text">Vektia</span>
-                    <span class="badge" id="tierBadge" style="margin-left:auto; font-size:0.7rem;"></span>
-                </div>
-            </div>
-            
-            <div style="padding: 1rem; color: var(--primary-color); font-weight: 500; border-bottom: 1px solid var(--border-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="clientNameDisplay">
-                Yükleniyor...
-            </div>
-
-            <nav class="sidebar-nav">
-                <div class="nav-section-label">Stüdyo Menüsü</div>
-                <a href="customer.html" class="nav-item">
-                    <span class="nav-icon">📊</span>
-                    <span data-i18n="menu_dashboard">Dashboard</span>
-                </a>
-                <a href="customer_players.html" class="nav-item active">
-                    <span class="nav-icon">👥</span>
-                    <span data-i18n="menu_users">Kullanıcılar</span>
-                </a>
-                <a href="customer_billing.html" class="nav-item">
-                    <span class="nav-icon">💳</span>
-                    <span data-i18n="menu_billing">Üyelik Bilgilerim</span>
-                </a>
-                <a href="customer_settings.html" class="nav-item">
-                    <span class="nav-icon">⚙️</span>
-                    <span data-i18n="menu_settings">Ayarlar</span>
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <button class="btn btn-ghost" style="width: 100%; text-align: left; display: flex; align-items: center; gap: 0.5rem;" onclick="logoutCustomer()">
-                    🚪 <span data-i18n="menu_logout">Çıkış Yap</span>
-                </button>
-            </div>
+        <aside class="sidebar" id="sidebar-container" style="width: 260px;">
+            <!-- Loaded by layout.js -->
         </aside>
 
         <!-- ═══ MAIN CONTENT ═══ -->
@@ -142,11 +106,14 @@
     </dialog>
 
     <script src="js/i18n.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/api.js"></script>
     <script>
         if (!VektiaAPI.getToken()) {
             window.location.href = 'customer_login.html';
         }
+
+        renderCustomerSidebar('players');
 
         let isPremium = true;
 
@@ -157,13 +124,24 @@
                 
                 const tierBadge = document.getElementById('tierBadge');
                 if (response.tier === 'free') {
-                    tierBadge.className = 'badge badge-low';
+                    tierBadge.className = 'badge badge-tier-free';
                     tierBadge.textContent = 'FREE TIER';
                     isPremium = false;
                     document.getElementById('premiumLock').style.display = 'block';
                 } else {
-                    tierBadge.className = 'badge badge-high';
-                    tierBadge.textContent = 'PREMIUM';
+                    let tierName = 'PRO';
+                    tierBadge.className = 'badge badge-tier-pro';
+                    
+                    if (response.tier === 'payg') {
+                        tierName = 'PAY AS YOU GO';
+                        tierBadge.className = 'badge badge-tier-payg';
+                    }
+                    if (response.tier === 'enterprise') {
+                        tierName = 'ENTERPRISE';
+                        tierBadge.className = 'badge badge-tier-enterprise';
+                    }
+                    
+                    tierBadge.textContent = tierName;
                     isPremium = true;
                     document.getElementById('premiumLock').style.display = 'none';
                 }

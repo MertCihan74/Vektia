@@ -9,28 +9,8 @@
 </head>
 <body>
     <div class="app-layout">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-logo">
-                    <div class="logo-icon">V</div>
-                    <span class="logo-text">Vektia</span>
-                    <span class="logo-badge">v0.1</span>
-                </div>
-            </div>
-            <nav class="sidebar-nav">
-                <div class="nav-section-label">Ana Menü</div>
-                <a href="index.html" class="nav-item" data-page="dashboard"><span class="nav-icon">📊</span> Dashboard</a>
-
-                <div class="nav-section-label">Sistem</div>
-                <a href="settings.html" class="nav-item active" data-page="settings"><span class="nav-icon">⚙️</span> Ayarlar</a>
-            </nav>
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <div class="user-avatar">A</div>
-                    <div class="user-details"><div class="user-name">Admin</div><div class="user-role">Yönetici</div></div>
-                    <button class="btn btn-ghost btn-sm" onclick="VektiaAPI.logout()">🚪</button>
-                </div>
-            </div>
+        <aside class="sidebar" id="sidebar-container">
+            <!-- Loaded by layout.js -->
         </aside>
 
         <main class="main-content">
@@ -127,10 +107,14 @@
         </main>
     </div>
 
+    <script src="js/layout.js"></script>
     <script src="js/api.js"></script>
     <script src="js/app.js"></script>
     <script>
         if (!requireAuth()) throw new Error('Auth required');
+        
+        renderAdminSidebar('settings');
+        loadAdminInfo();
 
         // URL'leri ayarla
         document.getElementById('apiUrl').value = `${window.location.origin}/api/v1/telemetry/event`;

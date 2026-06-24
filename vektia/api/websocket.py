@@ -42,18 +42,27 @@ async def telemetry_stream(websocket: WebSocket):
     await websocket.accept()
 
     # === Auth Aşaması ===
+    client_id = None
     try:
         auth_msg = await asyncio.wait_for(websocket.receive_json(), timeout=10.0)
         api_key = auth_msg.get("auth", "")
 
-        if not validate_api_key(api_key):
-            await websocket.send_json({"error": "Geçersiz API key"})
-            await websocket.close(code=4001)
-            return
+        from vektia.db.database import get_session, Client
+        from sqlalchemy import select
+        
+        async with get_session() as session:
+            result = await session.execute(select(Client).where(Client.api_key == api_key))
+            client = result.scalar_one_or_none()
+            
+            if not client or not client.is_active:
+                await websocket.send_json({"error": "Geçersiz API key"})
+                await websocket.close(code=4001)
+                return
+            client_id = client.id
 
         server_id = auth_msg.get("server_id", "unknown")
         await websocket.send_json({"status": "authenticated", "server_id": server_id})
-        logger.info(f"WebSocket telemetri bağlantısı: {server_id}")
+        logger.info(f"WebSocket telemetri bağlantısı: {server_id} (Client ID: {client_id})")
 
     except asyncio.TimeoutError:
         await websocket.send_json({"error": "Auth timeout"})
@@ -67,6 +76,7 @@ async def telemetry_stream(websocket: WebSocket):
 
             try:
                 event = TelemetryEvent(**raw_data)
+                event.client_id = client_id  # Fill client_id from Auth phase
                 if event.server_id is None:
                     event.server_id = server_id
 

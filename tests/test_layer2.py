@@ -8,8 +8,21 @@ import random
 import time
 import pytest
 
-from vektia.core.models import WindowData, ActionType, RiskLevel
+from vektia.core.models import WindowData, ActionType, RiskLevel, Vector3
 from vektia.core.layer2_stats import StatisticalFilter
+
+
+def make_click_window(player_id: str, timestamps: list[float], coords: list) -> WindowData:
+    """CLICK + koordinatlı test penceresi (spatial analiz için)."""
+    return WindowData(
+        client_id=1,
+        player_id=player_id,
+        timestamps=timestamps,
+        action_type=ActionType.CLICK,
+        has_enough_data=True,
+        window_size=len(timestamps),
+        coords_list=coords,
+    )
 
 
 @pytest.fixture
@@ -20,6 +33,7 @@ def stats_filter():
 def make_window(player_id: str, timestamps: list[float]) -> WindowData:
     """Test için WindowData oluşturur."""
     return WindowData(
+        client_id=1,
         player_id=player_id,
         timestamps=timestamps,
         action_type=ActionType.HIT,
@@ -110,7 +124,9 @@ class TestStatisticalFilter:
         
         result = stats_filter.analyze(window)
         
-        assert len(result.feature_vector) == 6
+        # feature_vector ML için 8 boyutludur (std, cv, entropy, autocorr,
+        # mean, median, skewness, range_ratio) — bkz. models.py
+        assert len(result.feature_vector) == 8
 
     def test_risk_score_bounded(self, stats_filter):
         """Risk skoru 0-1 arasında olmalı."""
@@ -161,3 +177,46 @@ class TestStatisticalFilter:
         assert result.mean_delta < 15.0
         assert result.std_deviation < 5.0
         assert result.risk_score > 0.1
+
+
+class TestSpatialAnalysis:
+    """Mekansal (mouse/konum) robotik-hareket sinyali testleri — Faz: spatial."""
+
+    def test_spatial_human_noisy_movement_low(self, stats_filter):
+        """Gürültülü/eğrisel insan mouse hareketi → düşük spatial skor."""
+        random.seed(1)
+        xs = [100 + random.uniform(-40, 40) for _ in range(20)]
+        ys = [100 + random.uniform(-40, 40) for _ in range(20)]
+        assert stats_filter._spatial_score(xs, ys, cv=0.4, range_ratio=8.0) < 0.4
+
+    def test_spatial_fixed_target_autoclicker_high(self, stats_filter):
+        """Sabit hedefe oto-tıklama (0 yayılım) + düzenli ritim → yüksek skor."""
+        xs = [200.0] * 20
+        ys = [150.0] * 20
+        assert stats_filter._spatial_score(xs, ys, cv=0.02, range_ratio=1.05) >= 0.85
+
+    def test_spatial_linear_path_bot_high(self, stats_filter):
+        """Mükemmel düz çizgi + sabit adım = robotik → yüksek skor."""
+        xs = [float(10 * i) for i in range(20)]
+        ys = [float(5 * i) for i in range(20)]
+        assert stats_filter._spatial_score(xs, ys, cv=0.3, range_ratio=5.0) >= 0.7
+
+    def test_robotic_mouse_raises_risk_vs_human(self, stats_filter):
+        """AYNI insani timing'de robotik mouse hareketi, insani hareketten daha riskli olmalı."""
+        ts = generate_timestamps(20, interval_ms=150.0, jitter_ms=30.0)  # insani timing
+        random.seed(2)
+        human_coords = [Vector3(x=100 + random.uniform(-50, 50),
+                                y=100 + random.uniform(-50, 50)) for _ in range(20)]
+        bot_coords = [Vector3(x=10.0 * i, y=5.0 * i) for i in range(20)]  # düz çizgi
+        human = stats_filter.analyze(make_click_window("h", ts, human_coords))
+        bot = stats_filter.analyze(make_click_window("b", ts, bot_coords))
+        assert bot.risk_score > human.risk_score
+
+    def test_human_mouse_keeps_clean(self, stats_filter):
+        """İnsani timing + insani mouse → CLEAN/LOW kalmalı (FP yok)."""
+        ts = generate_timestamps(20, interval_ms=150.0, jitter_ms=35.0)
+        random.seed(3)
+        coords = [Vector3(x=100 + random.uniform(-60, 60),
+                          y=100 + random.uniform(-60, 60)) for _ in range(20)]
+        result = stats_filter.analyze(make_click_window("h2", ts, coords))
+        assert result.risk_level in (RiskLevel.CLEAN, RiskLevel.LOW)

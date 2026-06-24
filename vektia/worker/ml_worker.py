@@ -14,6 +14,7 @@ import json
 from vektia.core.layer3_ml import ml_detector
 from vektia.core.models import StatsResult, RiskLevel
 from vektia.db.redis_client import init_redis, get_redis, close_redis
+from vektia.db import repositories as repo
 from vektia.config import get_settings
 from vektia.utils.logger import get_logger
 
@@ -52,6 +53,8 @@ async def process_ml_queue() -> int:
                 autocorrelation=features[3] if len(features) > 3 else 0.0,
                 mean_delta=features[4] if len(features) > 4 else 0.0,
                 median_delta=features[5] if len(features) > 5 else 0.0,
+                skewness=features[6] if len(features) > 6 else 0.0,
+                range_ratio=features[7] if len(features) > 7 else 1.0,
                 risk_score=task.get("risk_score", 0.5),
             )
 
@@ -95,6 +98,19 @@ async def process_ml_queue() -> int:
             else:
                 # Temiz — şüpheli listesinden çıkar
                 await redis.srem(f"vektia:client:{client_id}:flagged:suspicious", player_id)
+                
+                # DB'de active olarak geri işaretle
+                try:
+                    await repo.update_player_status(
+                        client_id=client_id,
+                        player_id=player_id,
+                        status="active",
+                        risk_level="clean",
+                        risk_score=anomaly_score
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to reset player status to active: {e}")
+                    
                 logger.info(
                     f"[ML WORKER] Temiz: {player_id} "
                     f"(skor: {anomaly_score:.4f})"
