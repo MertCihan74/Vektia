@@ -35,8 +35,29 @@
             border-bottom: 1px solid var(--border-color);
         }
         .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; display:flex; align-items:center; gap:0.5rem; text-decoration: none; color: white;}
-        .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary-color), var(--accent-cyan)); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-weight:900; }
         
+        /* Language Select */
+        .lang-select {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            outline: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1em;
+            padding-right: 2.25rem;
+        }
+        .lang-select option { background: var(--surface-color); color: var(--text-color); }
+
         .container {
             max-width: 800px;
             margin: 4rem auto;
@@ -63,60 +84,132 @@
 
     <nav>
         <a href="index.html" class="logo">
-            <div class="logo-icon">V</div>
-            Vektia
+            <img src="/logo.png" alt="Vektia" style="height: 55px;" onerror="this.src='./logo.png'" />
         </a>
+        <select id="langSelect" class="lang-select" onchange="i18n.setLang(this.value)">
+            <option value="en">🇬🇧 English</option>
+            <option value="tr">🇹🇷 Türkçe</option>
+        </select>
     </nav>
 
     <div class="container">
-        <h1>Gizlilik Politikası (KVKK ve GDPR)</h1>
-        <p>Son Güncelleme: 23 Haziran 2026</p>
+        <h1 data-i18n="priv_title">Gizlilik Politikası (KVKK ve GDPR)</h1>
+        <p data-i18n="priv_updated">Son Güncelleme: 23 Haziran 2026</p>
 
-        <p>Vektia olarak, mahremiyetinize ve kişisel verilerinizin güvenliğine büyük önem veriyoruz. Bu metin, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) ve Avrupa Genel Veri Koruma Yönetmeliği (GDPR) kapsamında veri işleme faaliyetlerimizi açıklamaktadır.</p>
+        <p data-i18n="priv_intro">Vektia olarak, mahremiyetinize ve kişisel verilerinizin güvenliğine büyük önem veriyoruz. Bu metin, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) ve Avrupa Genel Veri Koruma Yönetmeliği (GDPR) kapsamında veri işleme faaliyetlerimizi açıklamaktadır.</p>
 
-        <h2>1. Veri Sorumlusu ve Veri İşleyen Rolleri</h2>
-        <p>Vektia, bir B2B SaaS hizmeti olup Müşterilerine (Oyun stüdyoları, yazılım firmaları) anti-fraud (bot tespit) altyapısı sunar. Bu bağlamda:</p>
+        <h2 data-i18n="priv_h1">1. Veri Sorumlusu ve Veri İşleyen Rolleri</h2>
+        <p data-i18n="priv_p1">Vektia, bir B2B SaaS hizmeti olup Müşterilerine (Oyun stüdyoları, yazılım firmaları) anti-fraud (bot tespit) altyapısı sunar. Bu bağlamda:</p>
         <ul>
-            <li><strong>Veri Sorumlusu (Data Controller):</strong> Hizmetimizi kullanan Müşteri'dir. Müşteri, kendi platformundaki son kullanıcıları (oyuncuları) aydınlatmakla ve gerekli rızaları almakla yükümlüdür.</li>
-            <li><strong>Veri İşleyen (Data Processor):</strong> Vektia'dır. Biz sadece Müşteri'nin bize API üzerinden gönderdiği telemetri verilerini sözleşme amaçlarına (bot tespiti) uygun şekilde işleriz.</li>
+            <li data-i18n="priv_li1_1"><strong>Veri Sorumlusu (Data Controller):</strong> Hizmetimizi kullanan Müşteri'dir. Müşteri, kendi platformundaki son kullanıcıları (oyuncuları) aydınlatmakla ve gerekli rızaları almakla yükümlüdür.</li>
+            <li data-i18n="priv_li1_2"><strong>Veri İşleyen (Data Processor):</strong> Vektia'dır. Biz sadece Müşteri'nin bize API üzerinden gönderdiği telemetri verilerini sözleşme amaçlarına (bot tespiti) uygun şekilde işleriz.</li>
         </ul>
 
-        <h2>2. Hangi Verileri Topluyoruz?</h2>
-        <p>Vektia, Müşterilerin bize ilettiği şu telemetri ve analitik verilerini toplar:</p>
+        <h2 data-i18n="priv_h2">2. Hangi Verileri Topluyoruz?</h2>
+        <p data-i18n="priv_p2">Vektia, Müşterilerin bize ilettiği şu telemetri ve analitik verilerini toplar:</p>
         <ul>
-            <li><strong>Davranışsal Veriler:</strong> Fare (mouse) hareket koordinatları, tıklama süreleri, tuş basım gecikmeleri, scroll eylemleri.</li>
-            <li><strong>Sistem Metrikleri:</strong> Gelen isteklerin timestamp (zaman damgası) bilgileri.</li>
-            <li><strong>Tanımlayıcılar:</strong> Müşteri tarafından atanan rastgele veya spesifik <code>player_id</code> değerleri. (Vektia, bu değerlerin maskelenmiş "UUID" formatında veya hash'lenmiş olarak gönderilmesini şiddetle tavsiye eder).</li>
-            <li><strong>İstemci Verisi (Müşterilerimiz için):</strong> Vektia'ya kayıt olan stüdyoların isimleri, kurumsal e-posta adresleri, fatura bilgileri ve şifreli şifre/API anahtarları.</li>
+            <li data-i18n="priv_li2_1"><strong>Davranışsal Veriler:</strong> Fare (mouse) hareket koordinatları, tıklama süreleri, tuş basım gecikmeleri, scroll eylemleri.</li>
+            <li data-i18n=\"priv_li2_2\"><strong>Sistem Metrikleri:</strong> Gelen isteklerin timestamp (zaman damgası) bilgileri.</li>
+            <li data-i18n="priv_li2_3"><strong>Tanımlayıcılar:</strong> Müşteri tarafından atanan rastgele veya spesifik <code>player_id</code> değerleri. (Vektia, bu değerlerin maskelenmiş "UUID" formatında veya hash'lenmiş olarak gönderilmesini şiddetle tavsiye eder).</li>
+            <li data-i18n="priv_li2_4"><strong>İstemci Verisi (Müşterilerimiz için):</strong> Vektia'ya kayıt olan stüdyoların isimleri, kurumsal e-posta adresleri, fatura bilgileri ve şifreli şifre/API anahtarları.</li>
         </ul>
 
-        <h2>3. Verileri Neden ve Nasıl İşliyoruz?</h2>
-        <p>Telemetri verileri (oyuncu davranışları), sistemimizdeki istatistiksel modeller ve Derin Öğrenme (LSTM) algoritmaları tarafından analiz edilir. Amacımız makro yazılımlarını, hileleri ve otomatik botları gerçek insan davranışlarından ayırt etmektir.</p>
-        <p>Oyunculara ait davranışsal veriler, sistemin yapay zeka modelini eğitmek (sürekli öğrenme) ve doğruluğu artırmak için <strong>anonimleştirilerek</strong> kullanılabilir.</p>
+        <h2 data-i18n="priv_h3">3. Verileri Neden ve Nasıl İşliyoruz?</h2>
+        <p data-i18n="priv_p3_1">Telemetri verileri (oyuncu davranışları), sistemimizdeki istatistiksel modeller ve Derin Öğrenme (LSTM) algoritmaları tarafından analiz edilir. Amacımız makro yazılımlarını, hileleri ve otomatik botları gerçek insan davranışlarından ayırt etmektir.</p>
+        <p data-i18n="priv_p3_2">Oyunculara ait davranışsal veriler, sistemin yapay zeka modelini eğitmek (sürekli öğrenme) ve doğruluğu artırmak için <strong>anonimleştirilerek</strong> kullanılabilir.</p>
 
-        <h2>4. Veri Güvenliği ve Saklama</h2>
-        <p>Vektia, gönderilen tüm verileri şifrelenmiş kanallar (HTTPS/WSS) üzerinden alır. Verileriniz, dünya standartlarındaki bulut altyapılarında şifreli olarak barındırılır.</p>
+        <h2 data-i18n="priv_h4">4. Veri Güvenliği ve Saklama</h2>
+        <p data-i18n="priv_p4">Vektia, gönderilen tüm verileri şifrelenmiş kanallar (HTTPS/WSS) üzerinden alır. Verileriniz, dünya standartlarındaki bulut altyapılarında şifreli olarak barındırılır.</p>
         <ul>
-            <li>İşlenen telemetri olayları (events), anlık olarak Redis üzerinde tutulur ve analiz sonrasında düzenli olarak bellekten silinir.</li>
-            <li>Sadece anomali ve risk skorlamaları kalıcı olarak PostgreSQL veritabanında saklanır.</li>
-            <li>Aboneliğini sonlandıran Müşterilerin tüm telemetri kayıtları ve tespit skorları sistemden kalıcı olarak silinir.</li>
+            <li data-i18n="priv_li4_1">İşlenen telemetri olayları (events), anlık olarak Redis üzerinde tutulur ve analiz sonrasında düzenli olarak bellekten silinir.</li>
+            <li data-i18n="priv_li4_2">Sadece anomali ve risk skorlamaları kalıcı olarak PostgreSQL veritabanında saklanır.</li>
+            <li data-i18n="priv_li4_3">Aboneliğini sonlandıran Müşterilerin tüm telemetri kayıtları ve tespit skorları sistemden kalıcı olarak silinir.</li>
         </ul>
 
-        <h2>5. Kişisel Veri Paylaşımı</h2>
-        <p>Vektia, Müşterilerin verilerini ve telemetri analiz sonuçlarını üçüncü şahıslara veya kurumlara satmaz, kiralamaz. Yalnızca yasal zorunluluklar çerçevesinde yetkili resmi makamlarla paylaşılabilir.</p>
+        <h2 data-i18n="priv_h5">5. Kişisel Veri Paylaşımı</h2>
+        <p data-i18n="priv_p5">Vektia, Müşterilerin verilerini ve telemetri analiz sonuçlarını üçüncü şahıslara veya kurumlara satmaz, kiralamaz. Yalnızca yasal zorunluluklar çerçevesinde yetkili resmi makamlarla paylaşılabilir.</p>
 
-        <h2>6. Müşteri (Veri Sorumlusu) Yükümlülükleri</h2>
-        <p>Vektia API'sini platformuna entegre eden Müşteri, kendi Gizlilik Politikası ve Çerez/Aydınlatma Metni'nde, kullanıcı (oyuncu) fare/klavye davranış verilerinin "Vektia" gibi 3. parti güvenlik (anti-fraud) servisleriyle paylaşıldığını açıkça beyan etmekle yükümlüdür. Doğrudan kimlik belirleyici verilerin (TCKN, İsim, açık E-posta vb.) Vektia telemetri paketleri içerisinde gönderilmesi yasaktır.</p>
+        <h2 data-i18n="priv_h6">6. Müşteri (Veri Sorumlusu) Yükümlülükleri</h2>
+        <p data-i18n="priv_p6">Vektia API'sini platformuna entegre eden Müşteri, kendi Gizlilik Politikası ve Çerez/Aydınlatma Metni'nde, kullanıcı (oyuncu) fare/klavye davranış verilerinin "Vektia" gibi 3. parti güvenlik (anti-fraud) servisleriyle paylaşıldığını açıkça beyan etmekle yükümlüdür. Doğrudan kimlik belirleyici verilerin (TCKN, İsim, açık E-posta vb.) Vektia telemetri paketleri içerisinde gönderilmesi yasaktır.</p>
 
     </div>
 
     <footer>
         <div>
-            <a href="terms.html">Hizmet Şartları</a>
-            <a href="privacy.html">Gizlilik Politikası (KVKK)</a>
+            <a href="terms.html" data-i18n="footer_terms">Hizmet Şartları</a>
+            <a href="privacy.html" data-i18n="footer_privacy">Gizlilik Politikası (KVKK)</a>
         </div>
-        <div style="margin-top: 1rem; font-size: 0.85rem;">&copy; 2026 Vektia. Tüm hakları saklıdır.</div>
+        <div style="margin-top: 1rem; font-size: 0.85rem;">&copy; 2026 Vektia. <span data-i18n="footer_rights">Tüm hakları saklıdır.</span></div>
     </footer>
 
+    <script src="/admin/js/i18n.js" onerror="this.src='../admin/js/i18n.js'"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof i18n !== 'undefined') {
+                i18n.dict.tr = { ...i18n.dict.tr,
+                    "footer_terms": "Hizmet Şartları",
+                    "footer_privacy": "Gizlilik Politikası (KVKK)",
+                    "footer_rights": "Tüm hakları saklıdır.",
+                    "priv_title": "Gizlilik Politikası (KVKK ve GDPR)",
+                    "priv_updated": "Son Güncelleme: 23 Haziran 2026",
+                    "priv_intro": "Vektia olarak, mahremiyetinize ve kişisel verilerinizin güvenliğine büyük önem veriyoruz. Bu metin, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) ve Avrupa Genel Veri Koruma Yönetmeliği (GDPR) kapsamında veri işleme faaliyetlerimizi açıklamaktadır.",
+                    "priv_h1": "1. Veri Sorumlusu ve Veri İşleyen Rolleri",
+                    "priv_p1": "Vektia, bir B2B SaaS hizmeti olup Müşterilerine (Oyun stüdyoları, yazılım firmaları) anti-fraud (bot tespit) altyapısı sunar. Bu bağlamda:",
+                    "priv_li1_1": "<strong>Veri Sorumlusu (Data Controller):</strong> Hizmetimizi kullanan Müşteri'dir. Müşteri, kendi platformundaki son kullanıcıları (oyuncuları) aydınlatmakla ve gerekli rızaları almakla yükümlüdür.",
+                    "priv_li1_2": "<strong>Veri İşleyen (Data Processor):</strong> Vektia'dır. Biz sadece Müşteri'nin bize API üzerinden gönderdiği telemetri verilerini sözleşme amaçlarına (bot tespiti) uygun şekilde işleriz.",
+                    "priv_h2": "2. Hangi Verileri Topluyoruz?",
+                    "priv_p2": "Vektia, Müşterilerin bize ilettiği şu telemetri ve analitik verilerini toplar:",
+                    "priv_li2_1": "<strong>Davranışsal Veriler:</strong> Fare (mouse) hareket koordinatları, tıklama süreleri, tuş basım gecikmeleri, scroll eylemleri.",
+                    "priv_li2_2": "<strong>Sistem Metrikleri:</strong> Gelen isteklerin timestamp (zaman damgası) bilgileri.",
+                    "priv_li2_3": "<strong>Tanımlayıcılar:</strong> Müşteri tarafından atanan rastgele veya spesifik <code>player_id</code> değerleri. (Vektia, bu değerlerin maskelenmiş 'UUID' formatında veya hash'lenmiş olarak gönderilmesini şiddetle tavsiye eder).",
+                    "priv_li2_4": "<strong>İstemci Verisi (Müşterilerimiz için):</strong> Vektia'ya kayıt olan stüdyoların isimleri, kurumsal e-posta adresleri, fatura bilgileri ve şifreli şifre/API anahtarları.",
+                    "priv_h3": "3. Verileri Neden ve Nasıl İşliyoruz?",
+                    "priv_p3_1": "Telemetri verileri (oyuncu davranışları), sistemimizdeki istatistiksel modeller ve Derin Öğrenme (LSTM) algoritmaları tarafından analiz edilir. Amacımız makro yazılımlarını, hileleri ve otomatik botları gerçek insan davranışlarından ayırt etmektir.",
+                    "priv_p3_2": "Oyunculara ait davranışsal veriler, sistemin yapay zeka modelini eğitmek (sürekli öğrenme) ve doğruluğu artırmak için <strong>anonimleştirilerek</strong> kullanılabilir.",
+                    "priv_h4": "4. Veri Güvenliği ve Saklama",
+                    "priv_p4": "Vektia, gönderilen tüm verileri şifrelenmiş kanallar (HTTPS/WSS) üzerinden alır. Verileriniz, dünya standartlarındaki bulut altyapılarında şifreli olarak barındırılır.",
+                    "priv_li4_1": "İşlenen telemetri olayları (events), anlık olarak Redis üzerinde tutulur ve analiz sonrasında düzenli olarak bellekten silinir.",
+                    "priv_li4_2": "Sadece anomali ve risk skorlamaları kalıcı olarak PostgreSQL veritabanında saklanır.",
+                    "priv_li4_3": "Aboneliğini sonlandıran Müşterilerin tüm telemetri kayıtları ve tespit skorları sistemden kalıcı olarak silinir.",
+                    "priv_h5": "5. Kişisel Veri Paylaşımı",
+                    "priv_p5": "Vektia, Müşterilerin verilerini ve telemetri analiz sonuçlarını üçüncü şahıslara veya kurumlara satmaz, kiralamaz. Yalnızca yasal zorunluluklar çerçevesinde yetkili resmi makamlarla paylaşılabilir.",
+                    "priv_h6": "6. Müşteri (Veri Sorumlusu) Yükümlülükleri",
+                    "priv_p6": "Vektia API'sini platformuna entegre eden Müşteri, kendi Gizlilik Politikası ve Çerez/Aydınlatma Metni'nde, kullanıcı (oyuncu) fare/klavye davranış verilerinin 'Vektia' gibi 3. parti güvenlik (anti-fraud) servisleriyle paylaşıldığını açıkça beyan etmekle yükümlüdür. Doğrudan kimlik belirleyici verilerin (TCKN, İsim, açık E-posta vb.) Vektia telemetri paketleri içerisinde gönderilmesi yasaktır."
+                };
+                
+                i18n.dict.en = { ...i18n.dict.en,
+                    "footer_terms": "Terms of Service",
+                    "footer_privacy": "Privacy Policy",
+                    "footer_rights": "All rights reserved.",
+                    "priv_title": "Privacy Policy (GDPR Compliant)",
+                    "priv_updated": "Last Updated: June 23, 2026",
+                    "priv_intro": "At Vektia, we deeply value your privacy and data security. This document outlines our data processing activities in accordance with GDPR and relevant data protection laws.",
+                    "priv_h1": "1. Data Controller and Data Processor Roles",
+                    "priv_p1": "Vektia is a B2B SaaS platform providing anti-fraud (bot detection) infrastructure to Clients (Game studios, software companies). In this context:",
+                    "priv_li1_1": "<strong>Data Controller:</strong> The Client using our service. The Client is responsible for informing their end-users (players) and obtaining necessary consents.",
+                    "priv_li1_2": "<strong>Data Processor:</strong> Vektia. We only process the telemetry data sent by the Client via API in accordance with contractual purposes (bot detection).",
+                    "priv_h2": "2. What Data Do We Collect?",
+                    "priv_p2": "Vektia collects the following telemetry and analytical data transmitted by Clients:",
+                    "priv_li2_1": "<strong>Behavioral Data:</strong> Mouse movement coordinates, click durations, keystroke delays, scroll actions.",
+                    "priv_li2_2": "<strong>System Metrics:</strong> Timestamps of incoming requests.",
+                    "priv_li2_3": "<strong>Identifiers:</strong> Random or specific <code>player_id</code> values assigned by the Client. (Vektia strongly recommends sending these masked as UUIDs or hashed).",
+                    "priv_li2_4": "<strong>Client Data (For our customers):</strong> Studio names, corporate emails, billing information, and encrypted API keys of studios registered to Vektia.",
+                    "priv_h3": "3. Why and How Do We Process Data?",
+                    "priv_p3_1": "Telemetry data (player behaviors) is analyzed by statistical models and Deep Learning (LSTM) algorithms in our system to distinguish macros, cheats, and automated bots from genuine human behavior.",
+                    "priv_p3_2": "Behavioral data belonging to players may be used in an <strong>anonymized</strong> form to train the system's AI model (continuous learning) and improve accuracy.",
+                    "priv_h4": "4. Data Security and Retention",
+                    "priv_p4": "Vektia receives all transmitted data over encrypted channels (HTTPS/WSS). Your data is hosted encrypted on world-class cloud infrastructures.",
+                    "priv_li4_1": "Processed telemetry events are temporarily held on Redis and regularly purged from memory after analysis.",
+                    "priv_li4_2": "Only anomaly and risk scores are permanently stored in the PostgreSQL database.",
+                    "priv_li4_3": "All telemetry records and detection scores of Clients who terminate their subscription are permanently deleted from the system.",
+                    "priv_h5": "5. Personal Data Sharing",
+                    "priv_p5": "Vektia does not sell or rent Clients' data or telemetry analysis results to third parties or institutions. They may only be shared with authorized official authorities within the framework of legal obligations.",
+                    "priv_h6": "6. Client (Data Controller) Obligations",
+                    "priv_p6": "The Client integrating the Vektia API into their platform is obliged to explicitly state in their own Privacy Policy and Cookie/Disclosure Text that user (player) mouse/keyboard behavior data is shared with 3rd party security (anti-fraud) services like 'Vektia'. It is prohibited to send direct identifying data (SSN, Name, plain Email, etc.) within Vektia telemetry packets."
+                };
+                i18n.translatePage();
+            }
+        });
+    </script>
 </body>
 </html>

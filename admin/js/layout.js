@@ -7,8 +7,7 @@ function renderCustomerSidebar(activeId) {
     const sidebarHtml = `
         <div class="sidebar-header">
             <div class="sidebar-logo">
-                <div class="logo-icon">V</div>
-                <span class="logo-text">Vektia</span>
+                <img src="../public/logo.png" alt="Vektia" style="height: 48px;" />
                 <span class="badge" id="tierBadge" style="margin-left:auto; font-size:0.7rem;"></span>
             </div>
         </div>
@@ -56,9 +55,8 @@ function renderAdminSidebar(activeId) {
     const sidebarHtml = `
         <div class="sidebar-header">
             <div class="sidebar-logo">
-                <div class="logo-icon">V</div>
-                <span class="logo-text">Vektia</span>
-                <span class="logo-badge">v0.1</span>
+                <img src="../public/logo.png" alt="Vektia" style="height: 48px;" />
+                <span class="logo-badge" style="margin-left: 0.5rem;">v0.1</span>
             </div>
         </div>
 

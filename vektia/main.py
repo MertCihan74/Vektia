@@ -192,4 +192,5 @@ if ADMIN_DIR.exists():
 
 PUBLIC_DIR = Path(__file__).parent.parent / "public"
 if PUBLIC_DIR.exists():
+    app.mount("/public", StaticFiles(directory=str(PUBLIC_DIR)), name="public_dir")
     app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")

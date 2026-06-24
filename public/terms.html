@@ -35,8 +35,29 @@
             border-bottom: 1px solid var(--border-color);
         }
         .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; display:flex; align-items:center; gap:0.5rem; text-decoration: none; color: white;}
-        .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary-color), var(--accent-cyan)); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-weight:900; }
         
+        /* Language Select */
+        .lang-select {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            outline: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1em;
+            padding-right: 2.25rem;
+        }
+        .lang-select option { background: var(--surface-color); color: var(--text-color); }
+
         .container {
             max-width: 800px;
             margin: 4rem auto;
@@ -63,49 +84,105 @@
 
     <nav>
         <a href="index.html" class="logo">
-            <div class="logo-icon">V</div>
-            Vektia
+            <img src="/logo.png" alt="Vektia" style="height: 55px;" onerror="this.src='./logo.png'" />
         </a>
+        <select id="langSelect" class="lang-select" onchange="i18n.setLang(this.value)">
+            <option value="en">🇬🇧 English</option>
+            <option value="tr">🇹🇷 Türkçe</option>
+        </select>
     </nav>
 
     <div class="container">
-        <h1>Vektia Hizmet Şartları</h1>
-        <p>Son Güncelleme: 23 Haziran 2026</p>
+        <h1 data-i18n="terms_title">Vektia Hizmet Şartları</h1>
+        <p data-i18n="terms_updated">Son Güncelleme: 23 Haziran 2026</p>
 
-        <h2>1. Hizmetin Kapsamı</h2>
-        <p>Vektia ("Biz", "Sistem", "Platform"), dijital platformlara, oyun stüdyolarına ve yazılım geliştiricilerine ("Müşteri", "Siz") yönelik B2B (İşletmeden İşletmeye) bir "Bot ve Makro Tespit" yazılım (SaaS) hizmetidir. Vektia, gönderilen telemetri (kullanıcı girdi davranışları) verilerini yapay zeka ve istatistiksel modellerle analiz eder ve anomali skorları üretir.</p>
+        <h2 data-i18n="terms_h1">1. Hizmetin Kapsamı</h2>
+        <p data-i18n="terms_p1">Vektia ("Biz", "Sistem", "Platform"), dijital platformlara, oyun stüdyolarına ve yazılım geliştiricilerine ("Müşteri", "Siz") yönelik B2B (İşletmeden İşletmeye) bir "Bot ve Makro Tespit" yazılım (SaaS) hizmetidir. Vektia, gönderilen telemetri (kullanıcı girdi davranışları) verilerini yapay zeka ve istatistiksel modellerle analiz eder ve anomali skorları üretir.</p>
 
-        <h2>2. Kayıt ve Erişim</h2>
+        <h2 data-i18n="terms_h2">2. Kayıt ve Erişim</h2>
         <ul>
-            <li>Vektia hizmetleri yalnızca kurumsal müşterilere sunulmaktadır. Kişisel ve geçici e-posta adresleriyle kayıtlar sistem tarafından otomatik reddedilir.</li>
-            <li>Size sağlanan "API Key"in gizliliği ve güvenliği tamamen sizin sorumluluğunuzdadır. Bu anahtarla yapılan tüm istekler Müşteri tarafından yapılmış sayılır.</li>
+            <li data-i18n="terms_li2_1">Vektia hizmetleri yalnızca kurumsal müşterilere sunulmaktadır. Kişisel ve geçici e-posta adresleriyle kayıtlar sistem tarafından otomatik reddedilir.</li>
+            <li data-i18n="terms_li2_2">Size sağlanan "API Key"in gizliliği ve güvenliği tamamen sizin sorumluluğunuzdadır. Bu anahtarla yapılan tüm istekler Müşteri tarafından yapılmış sayılır.</li>
         </ul>
 
-        <h2>3. Sorumlulukların Sınırlandırılması</h2>
-        <p>Vektia, kullanıcı davranışlarını analiz ederek ihtimaller (risk seviyeleri) sunar. <strong>Vektia, oluşturulan analiz sonuçlarının %100 doğru olduğunu garanti etmez.</strong></p>
+        <h2 data-i18n="terms_h3">3. Sorumlulukların Sınırlandırılması</h2>
+        <p data-i18n="terms_p3">Vektia, kullanıcı davranışlarını analiz ederek ihtimaller (risk seviyeleri) sunar. <strong>Vektia, oluşturulan analiz sonuçlarının %100 doğru olduğunu garanti etmez.</strong></p>
         <ul>
-            <li>Müşterinin, Vektia'nın sunduğu "Kesin Bot", "Yüksek Risk", "Şüpheli" gibi etiketlere veya skorlara dayanarak kendi oyuncularına uygulayacağı ban, uzaklaştırma, erişim engeli veya her türlü cezai yaptırımın tek sorumlusu Müşteri'dir.</li>
-            <li>Müşterinin platformunda oluşabilecek haksız banlamalar (False Positives) sebebiyle doğacak itibar kaybı, oyuncu şikayetleri veya maddi kayıplardan Vektia sorumlu tutulamaz.</li>
+            <li data-i18n="terms_li3_1">Müşterinin, Vektia'nın sunduğu "Kesin Bot", "Yüksek Risk", "Şüpheli" gibi etiketlere veya skorlara dayanarak kendi oyuncularına uygulayacağı ban, uzaklaştırma, erişim engeli veya her türlü cezai yaptırımın tek sorumlusu Müşteri'dir.</li>
+            <li data-i18n="terms_li3_2">Müşterinin platformunda oluşabilecek haksız banlamalar (False Positives) sebebiyle doğacak itibar kaybı, oyuncu şikayetleri veya maddi kayıplardan Vektia sorumlu tutulamaz.</li>
         </ul>
 
-        <h2>4. Otomatik Engelleme (Auto-Ban) Özelliği</h2>
-        <p>Vektia Premium panelinde bulunan "Otomatik Engelleme" özelliğini kullanan müşteriler, Vektia'nın tespitlerine doğrudan güvenerek işlem (ban/whitelist) uygulanmasına izin vermiş sayılırlar. Vektia, bu sistemin çalışmasından doğabilecek hatalı engellemeler konusunda mesuliyet kabul etmez. Müşteri, bu özelliği kendi risk inisiyatifine dayanarak kullanır.</p>
+        <h2 data-i18n="terms_h4">4. Otomatik Engelleme (Auto-Ban) Özelliği</h2>
+        <p data-i18n="terms_p4">Vektia Premium panelinde bulunan "Otomatik Engelleme" özelliğini kullanan müşteriler, Vektia'nın tespitlerine doğrudan güvenerek işlem (ban/whitelist) uygulanmasına izin vermiş sayılırlar. Vektia, bu sistemin çalışmasından doğabilecek hatalı engellemeler konusunda mesuliyet kabul etmez. Müşteri, bu özelliği kendi risk inisiyatifine dayanarak kullanır.</p>
 
-        <h2>5. Veri Kullanımı ve Telemetri Sınırları</h2>
-        <p>Hizmeti tersine mühendislik (reverse engineering) ile analiz etmek, yapay zeka modelini yanıltmak üzere suni veri pompalamak (data poisoning) veya Vektia API limitlerini kasıtlı olarak sömürmek yasaktır. Bu tür eylemler tespit edildiğinde Müşteri'nin hesabı önceden uyarılmaksızın feshedilebilir.</p>
+        <h2 data-i18n="terms_h5">5. Veri Kullanımı ve Telemetri Sınırları</h2>
+        <p data-i18n="terms_p5">Hizmeti tersine mühendislik (reverse engineering) ile analiz etmek, yapay zeka modelini yanıltmak üzere suni veri pompalamak (data poisoning) veya Vektia API limitlerini kasıtlı olarak sömürmek yasaktır. Bu tür eylemler tespit edildiğinde Müşteri'nin hesabı önceden uyarılmaksızın feshedilebilir.</p>
 
-        <h2>6. Abonelik ve İptal</h2>
-        <p>Ücretli abonelikler ("Premium") Lemon Squeezy aracılığıyla faturalandırılır. İptal durumunda hizmet dönem sonuna kadar devam eder, kısmi iade yapılmaz. Vektia, fiyatlandırma ve plan kapsamlarını 30 gün önceden haber vermek şartıyla değiştirme hakkını saklı tutar.</p>
+        <h2 data-i18n="terms_h6">6. Abonelik ve İptal</h2>
+        <p data-i18n="terms_p6">Ücretli abonelikler ("Premium") Lemon Squeezy aracılığıyla faturalandırılır. İptal durumunda hizmet dönem sonuna kadar devam eder, kısmi iade yapılmaz. Vektia, fiyatlandırma ve plan kapsamlarını 30 gün önceden haber vermek şartıyla değiştirme hakkını saklı tutar.</p>
 
     </div>
 
     <footer>
         <div>
-            <a href="terms.html">Hizmet Şartları</a>
-            <a href="privacy.html">Gizlilik Politikası (KVKK)</a>
+            <a href="terms.html" data-i18n="footer_terms">Hizmet Şartları</a>
+            <a href="privacy.html" data-i18n="footer_privacy">Gizlilik Politikası (KVKK)</a>
         </div>
-        <div style="margin-top: 1rem; font-size: 0.85rem;">&copy; 2026 Vektia. Tüm hakları saklıdır.</div>
+        <div style="margin-top: 1rem; font-size: 0.85rem;">&copy; 2026 Vektia. <span data-i18n="footer_rights">Tüm hakları saklıdır.</span></div>
     </footer>
 
+    <script src="/admin/js/i18n.js" onerror="this.src='../admin/js/i18n.js'"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof i18n !== 'undefined') {
+                i18n.dict.tr = { ...i18n.dict.tr,
+                    "footer_terms": "Hizmet Şartları",
+                    "footer_privacy": "Gizlilik Politikası (KVKK)",
+                    "footer_rights": "Tüm hakları saklıdır.",
+                    "terms_title": "Vektia Hizmet Şartları",
+                    "terms_updated": "Son Güncelleme: 23 Haziran 2026",
+                    "terms_h1": "1. Hizmetin Kapsamı",
+                    "terms_p1": "Vektia (\"Biz\", \"Sistem\", \"Platform\"), dijital platformlara, oyun stüdyolarına ve yazılım geliştiricilerine (\"Müşteri\", \"Siz\") yönelik B2B (İşletmeden İşletmeye) bir \"Bot ve Makro Tespit\" yazılım (SaaS) hizmetidir. Vektia, gönderilen telemetri (kullanıcı girdi davranışları) verilerini yapay zeka ve istatistiksel modellerle analiz eder ve anomali skorları üretir.",
+                    "terms_h2": "2. Kayıt ve Erişim",
+                    "terms_li2_1": "Vektia hizmetleri yalnızca kurumsal müşterilere sunulmaktadır. Kişisel ve geçici e-posta adresleriyle kayıtlar sistem tarafından otomatik reddedilir.",
+                    "terms_li2_2": "Size sağlanan \"API Key\"in gizliliği ve güvenliği tamamen sizin sorumluluğunuzdadır. Bu anahtarla yapılan tüm istekler Müşteri tarafından yapılmış sayılır.",
+                    "terms_h3": "3. Sorumlulukların Sınırlandırılması",
+                    "terms_p3": "Vektia, kullanıcı davranışlarını analiz ederek ihtimaller (risk seviyeleri) sunar. <strong>Vektia, oluşturulan analiz sonuçlarının %100 doğru olduğunu garanti etmez.</strong>",
+                    "terms_li3_1": "Müşterinin, Vektia'nın sunduğu \"Kesin Bot\", \"Yüksek Risk\", \"Şüpheli\" gibi etiketlere veya skorlara dayanarak kendi oyuncularına uygulayacağı ban, uzaklaştırma, erişim engeli veya her türlü cezai yaptırımın tek sorumlusu Müşteri'dir.",
+                    "terms_li3_2": "Müşterinin platformunda oluşabilecek haksız banlamalar (False Positives) sebebiyle doğacak itibar kaybı, oyuncu şikayetleri veya maddi kayıplardan Vektia sorumlu tutulamaz.",
+                    "terms_h4": "4. Otomatik Engelleme (Auto-Ban) Özelliği",
+                    "terms_p4": "Vektia Premium panelinde bulunan \"Otomatik Engelleme\" özelliğini kullanan müşteriler, Vektia'nın tespitlerine doğrudan güvenerek işlem (ban/whitelist) uygulanmasına izin vermiş sayılırlar. Vektia, bu sistemin çalışmasından doğabilecek hatalı engellemeler konusunda mesuliyet kabul etmez. Müşteri, bu özelliği kendi risk inisiyatifine dayanarak kullanır.",
+                    "terms_h5": "5. Veri Kullanımı ve Telemetri Sınırları",
+                    "terms_p5": "Hizmeti tersine mühendislik (reverse engineering) ile analiz etmek, yapay zeka modelini yanıltmak üzere suni veri pompalamak (data poisoning) veya Vektia API limitlerini kasıtlı olarak sömürmek yasaktır. Bu tür eylemler tespit edildiğinde Müşteri'nin hesabı önceden uyarılmaksızın feshedilebilir.",
+                    "terms_h6": "6. Abonelik ve İptal",
+                    "terms_p6": "Ücretli abonelikler (\"Premium\") Lemon Squeezy aracılığıyla faturalandırılır. İptal durumunda hizmet dönem sonuna kadar devam eder, kısmi iade yapılmaz. Vektia, fiyatlandırma ve plan kapsamlarını 30 gün önceden haber vermek şartıyla değiştirme hakkını saklı tutar."
+                };
+                
+                i18n.dict.en = { ...i18n.dict.en,
+                    "footer_terms": "Terms of Service",
+                    "footer_privacy": "Privacy Policy",
+                    "footer_rights": "All rights reserved.",
+                    "terms_title": "Vektia Terms of Service",
+                    "terms_updated": "Last Updated: June 23, 2026",
+                    "terms_h1": "1. Scope of Service",
+                    "terms_p1": "Vektia (\"We\", \"System\", \"Platform\") is a B2B (Business-to-Business) \"Bot and Macro Detection\" software (SaaS) service for digital platforms, game studios, and software developers (\"Client\", \"You\"). Vektia analyzes telemetry data (user input behaviors) using AI and statistical models to generate anomaly scores.",
+                    "terms_h2": "2. Registration and Access",
+                    "terms_li2_1": "Vektia services are only available to corporate clients. Registrations with personal or temporary email addresses are automatically rejected by the system.",
+                    "terms_li2_2": "The privacy and security of the \"API Key\" provided to you is entirely your responsibility. All requests made with this key are considered to be made by the Client.",
+                    "terms_h3": "3. Limitation of Liability",
+                    "terms_p3": "Vektia analyzes user behaviors to provide probabilities (risk levels). <strong>Vektia does not guarantee that the analysis results generated are 100% accurate.</strong>",
+                    "terms_li3_1": "The Client is solely responsible for any bans, suspensions, access blocks, or any punitive sanctions applied to their players based on labels or scores provided by Vektia, such as \"Confirmed Bot\", \"High Risk\", or \"Suspicious\".",
+                    "terms_li3_2": "Vektia cannot be held responsible for reputational loss, player complaints, or financial losses arising from unjustified bans (False Positives) that may occur on the Client's platform.",
+                    "terms_h4": "4. Auto-Ban Feature",
+                    "terms_p4": "Clients using the \"Auto-Ban\" feature in the Vektia Premium panel are deemed to have allowed actions (ban/whitelist) to be applied by relying directly on Vektia's detections. Vektia accepts no liability for erroneous blocks arising from the operation of this system. The Client uses this feature based on their own risk initiative.",
+                    "terms_h5": "5. Data Usage and Telemetry Limits",
+                    "terms_p5": "It is prohibited to analyze the service via reverse engineering, pump artificial data to mislead the AI model (data poisoning), or intentionally exploit Vektia API limits. When such actions are detected, the Client's account may be terminated without prior notice.",
+                    "terms_h6": "6. Subscription and Cancellation",
+                    "terms_p6": "Paid subscriptions (\"Premium\") are billed via Lemon Squeezy. In case of cancellation, the service continues until the end of the billing period, and no partial refunds are made. Vektia reserves the right to change pricing and plan scopes with 30 days prior notice."
+                };
+                i18n.translatePage();
+            }
+        });
+    </script>
 </body>
 </html>
